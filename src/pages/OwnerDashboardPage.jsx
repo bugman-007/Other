@@ -1,0 +1,6102 @@
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import AdminLayout from '../components/admin/AdminLayout';
+import DashboardLayout from '../components/dashboard/DashboardLayout';
+import CategoryForm from '../components/dashboard/CategoryForm';
+import BannerForm from '../components/dashboard/BannerForm';
+import HeroForm from '../components/dashboard/HeroForm';
+import FeatureSectionForm from '../components/dashboard/FeatureSectionForm';
+import PopupForm from '../components/dashboard/PopupForm';
+import HomepageBannerContentManager from '../components/dashboard/HomepageBannerContentManager';
+import ContentPopupManager from '../components/dashboard/ContentPopupManager';
+import AboutPageEdit from '../components/dashboard/AboutPageEdit';
+import ContactPageEdit from '../components/dashboard/ContactPageEdit';
+import PageEditor from '../components/dashboard/PageEditor';
+import Dashboard from '../components/admin/components/Dashboard';
+import { 
+  Modal, 
+  Checkbox, 
+  Input, 
+  Select, 
+  Divider, 
+  Button, 
+  Drawer,
+  message,
+  Table,
+  Form,
+  Switch,
+  Card,
+  Tabs,
+  DatePicker,
+  Upload,
+  Spin,
+  InputNumber,
+  Radio
+} from 'antd';
+import { 
+  UploadOutlined, 
+  SearchOutlined, 
+  PlusOutlined, 
+  EditOutlined, 
+  DeleteOutlined, 
+  EyeOutlined, 
+  UserOutlined, 
+  ShopOutlined, 
+  DollarOutlined, 
+  SettingOutlined, 
+  ExclamationCircleOutlined, 
+  LockOutlined, 
+  UnlockOutlined,
+  CheckCircleOutlined,
+  DollarCircleOutlined,
+  ShoppingOutlined,
+  TagOutlined,
+  RiseOutlined,
+  TeamOutlined,
+  AppstoreOutlined,
+  FileImageOutlined,
+  PhoneOutlined,
+  MessageOutlined,
+  BookOutlined,
+  FileTextOutlined,
+  ReadOutlined,
+  MenuOutlined,
+  HomeOutlined,
+  BellOutlined,
+  GiftOutlined,
+  MailOutlined,
+  CloseCircleOutlined,
+  QuestionCircleOutlined,
+  LinkOutlined,
+  FileOutlined,
+  InfoCircleOutlined,
+  CopyOutlined,
+  VideoCameraOutlined,
+  PlayCircleOutlined,
+  DesktopOutlined,
+  TabletOutlined,
+  MobileOutlined
+} from '@ant-design/icons';
+import HomepageBannerEdit from '../components/dashboard/HomepageBannerEdit';
+import './OwnerDashboardPage.css';
+import { 
+  FaUsers, FaStore, FaHandshake, FaChartLine, FaTrash, FaEdit, 
+  FaEye, FaPlus, FaGlobe, FaCopy, FaSearch, FaLanguage
+} from 'react-icons/fa';
+import CategoryArticles from '../components/dashboard/CategoryArticles';
+import { Dropdown, Menu } from 'antd';
+import PageManagerTab from '../components/dashboard/PageManagerTab';
+import { FiUsers, FiLink, FiMousePointer, FiPercent } from 'react-icons/fi';
+import { mockGetAnalyticsData } from '../mockApi';
+import MarketingMaterialsUpload from '../components/admin/MarketingMaterialsUpload';
+
+const OwnerDashboardPage = ({ onLogout }) => {
+  const [activeTab, setActiveTab] = useState('overview');
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [editingCategory, setEditingCategory] = useState(null);
+  const [isAddingCategory, setIsAddingCategory] = useState(false);
+  const [editingHomeSection, setEditingHomeSection] = useState(null);
+  const [viewingArticles, setViewingArticles] = useState(null);
+  
+  // Chat management state
+  const [chatContacts, setChatContacts] = useState([
+    { id: 'm1', name: 'Fashion Retailer Co.', type: 'merchant', avatar: 'FC', unread: 2, lastMessage: 'We need help with the product upload API', lastMessageTime: '2 hours ago', online: true },
+    { id: 'm2', name: 'Urban Styles LLC', type: 'merchant', avatar: 'US', unread: 0, lastMessage: 'Thanks for your assistance!', lastMessageTime: 'Yesterday', online: false },
+    { id: 'a1', name: 'John Doe', type: 'affiliate', avatar: 'JD', unread: 3, lastMessage: 'How do I update my payment information?', lastMessageTime: '3 hours ago', online: true },
+    { id: 'a2', name: 'Jane Smith', type: 'affiliate', avatar: 'JS', unread: 1, lastMessage: 'When will the new commission structure be live?', lastMessageTime: '1 day ago', online: false }
+  ]);
+  
+  const [activeChat, setActiveChat] = useState(null);
+  const [chatFilter, setChatFilter] = useState('all'); // 'all', 'merchants', 'affiliates'
+  const [messageInput, setMessageInput] = useState('');
+  const [chatMessages, setChatMessages] = useState({
+    'm1': [
+      { id: 1, sender: 'merchant', content: 'Hi there, we need some assistance with the API.', time: '2 days ago' },
+      { id: 2, sender: 'admin', content: 'Hello! I\'d be happy to help. What specific issue are you experiencing?', time: '2 days ago' },
+      { id: 3, sender: 'merchant', content: 'We\'re trying to upload product variants, but getting error code 403.', time: '1 day ago' },
+      { id: 4, sender: 'admin', content: 'Let me check that for you. It might be a permission issue.', time: '1 day ago' },
+      { id: 5, sender: 'merchant', content: 'We need help with the product upload API', time: '2 hours ago' }
+    ],
+    'm2': [
+      { id: 1, sender: 'merchant', content: 'Is there a way to bulk import products from our existing store?', time: '2 days ago' },
+      { id: 2, sender: 'admin', content: 'Yes, we support CSV imports. I can walk you through the process.', time: '2 days ago' },
+      { id: 3, sender: 'merchant', content: 'That would be great!', time: '2 days ago' },
+      { id: 4, sender: 'admin', content: 'I\'ve sent you the template. Let me know if you need help filling it out.', time: '1 day ago' },
+      { id: 5, sender: 'merchant', content: 'Thanks for your assistance!', time: 'Yesterday' }
+    ],
+    'a1': [
+      { id: 1, sender: 'affiliate', content: 'I\'m having trouble with my affiliate link tracking.', time: '1 week ago' },
+      { id: 2, sender: 'admin', content: 'I\'ll help you troubleshoot that. What happens when you test your links?', time: '1 week ago' },
+      { id: 3, sender: 'affiliate', content: 'The clicks register but conversions aren\'t being tracked.', time: '6 days ago' },
+      { id: 4, sender: 'admin', content: 'Let me check the conversion tracking for your account.', time: '5 days ago' },
+      { id: 5, sender: 'affiliate', content: 'How do I update my payment information?', time: '3 hours ago' }
+    ],
+    'a2': [
+      { id: 1, sender: 'affiliate', content: 'Hello, I\'d like to discuss the upcoming promotions.', time: '3 days ago' },
+      { id: 2, sender: 'admin', content: 'Hi Jane, I\'d be happy to discuss them with you. We have a summer sale coming up.', time: '3 days ago' },
+      { id: 3, sender: 'affiliate', content: 'Great! When will it start?', time: '2 days ago' },
+      { id: 4, sender: 'admin', content: 'It starts on June 15th and runs for two weeks. I\'ll send you the promotional materials.', time: '1 day ago' },
+      { id: 5, sender: 'affiliate', content: 'When will the new commission structure be live?', time: '1 day ago' }
+    ]
+  });
+  
+  const [quickResponses, setQuickResponses] = useState([
+    { id: 1, text: 'Hello! How can I assist you today?' },
+    { id: 2, text: 'Thank you for reaching out. I\'ll look into this immediately.' },
+    { id: 3, text: 'I\'ve escalated this issue to our technical team and will update you shortly.' },
+    { id: 4, text: 'Here\'s a link to our documentation that might help: [link]' },
+    { id: 5, text: 'Let me know if you need anything else!' }
+  ]);
+  
+  const [popups, setPopups] = useState([
+    {
+      id: '1',
+      title: 'Body Scanning Position Guide',
+      content: 'To get the best results from our virtual try-on technology, please position your body facing forward with arms slightly away from your sides. Make sure your entire body is visible in the frame from head to toe.',
+      imageUrl: 'https://example.com/images/scanning-guide.jpg',
+      enabled: true,
+      pages: ['try-on'],
+      showOnce: true,
+      position: 'center',
+      size: 'medium',
+      delay: 1,
+      deviceTargeting: {
+        desktop: true,
+        tablet: true,
+        mobile: true
+      },
+      type: 'tutorial'
+    },
+    {
+      id: '2',
+      title: 'How To Scan',
+      content: 'Follow these steps for the best scan results:\n1. Stand 6-8 feet from your camera\n2. Wear fitted clothing\n3. Position your entire body in the frame\n4. Hold still during scanning',
+      imageUrl: 'https://images.unsplash.com/photo-1585412727339-54e4bae3bbf9?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3',
+      enabled: true,
+      pages: ['try-on'],
+      showOnce: true,
+      position: 'center',
+      size: 'large',
+      delay: 1,
+      deviceTargeting: {
+        desktop: true,
+        tablet: true,
+        mobile: true
+      },
+      type: 'tutorial'
+    }
+  ]);
+  const [editingPopup, setEditingPopup] = useState(null);
+  const [showPopupForm, setShowPopupForm] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(localStorage.getItem('isAuthenticated') === 'true');
+  const [userRole, setUserRole] = useState(localStorage.getItem('userRole') || '');
+
+  // Add missing state variables for articles
+  const [editingArticle, setEditingArticle] = useState(null);
+  const [isAddingArticle, setIsAddingArticle] = useState(false);
+  const [articleFormVisible, setArticleFormVisible] = useState(false);
+  const [articleFormData, setArticleFormData] = useState({
+    title: '',
+    category: '',
+    summary: '',
+    content: '',
+    image: '',
+    status: 'draft'
+  });
+
+  // Add missing handlers for articles
+  const handleArticleEdit = (articleId) => {
+    // Mock implementation
+    setEditingArticle(articleId);
+    setArticleFormVisible(true);
+  };
+
+  const handleArticleDelete = (articleId) => {
+    // Mock implementation
+    console.log('Deleting article:', articleId);
+    // Implement actual deletion logic if needed
+  };
+
+  const handleArticleFormSubmit = () => {
+    // Mock implementation
+    setArticleFormVisible(false);
+    setEditingArticle(null);
+  };
+
+  // Add missing state variables for subscription plans
+  const [subscriptionPlans, setSubscriptionPlans] = useState([
+    {
+      id: '1',
+      name: 'Basic Plan',
+      description: 'Essential features for small businesses',
+      prices: [{ country: 'Global', language: 'English', currency: 'USD', symbol: '$', monthly: 49, annual: 470, discountPercentage: 20 }],
+      features: ['Up to 100 products', 'Basic analytics', 'Email support'],
+      active: true
+    },
+    {
+      id: '2',
+      name: 'Professional Plan',
+      description: 'Advanced features for growing businesses',
+      prices: [{ country: 'Global', language: 'English', currency: 'USD', symbol: '$', monthly: 99, annual: 950, discountPercentage: 20 }],
+      features: ['Unlimited products', 'Advanced analytics', 'Priority support', 'API access'],
+      active: true
+    }
+  ]);
+  const [editingPlan, setEditingPlan] = useState(null);
+  const [planFormVisible, setPlanFormVisible] = useState(false);
+  const [planFormData, setPlanFormData] = useState({
+    name: '',
+    description: '',
+    prices: [{
+      country: 'Global',
+      language: 'English',
+      currency: 'USD',
+      symbol: '$',
+      monthly: 0,
+      annual: 0,
+      discountPercentage: 20
+    }],
+    features: [''],
+    active: true
+  });
+
+  // Add missing handlers for subscription plans
+  const handlePlanAdd = () => {
+    setPlanFormData({
+      name: '',
+      description: '',
+      prices: [{
+        country: 'Global',
+        language: 'English',
+        currency: 'USD',
+        symbol: '$',
+        monthly: 0,
+        annual: 0,
+        discountPercentage: 20
+      }],
+      features: [''],
+      active: true
+    });
+    setPlanFormVisible(true);
+  };
+
+  const handlePlanEdit = (planId) => {
+    const plan = subscriptionPlans.find(plan => plan.id === planId);
+    if (plan) {
+      setPlanFormData({...plan});
+      setEditingPlan(planId);
+      setPlanFormVisible(true);
+    }
+  };
+
+  const handlePlanDelete = (planId) => {
+    setSubscriptionPlans(subscriptionPlans.filter(plan => plan.id !== planId));
+  };
+
+  const handlePlanToggleStatus = (planId) => {
+    setSubscriptionPlans(
+      subscriptionPlans.map(plan => 
+        plan.id === planId 
+          ? { ...plan, active: !plan.active } 
+          : plan
+      )
+    );
+  };
+
+  const handlePlanSave = () => {
+    if (editingPlan) {
+      // Update existing plan
+      setSubscriptionPlans(
+        subscriptionPlans.map(plan => 
+          plan.id === editingPlan 
+            ? { ...planFormData, id: editingPlan } 
+            : plan
+        )
+      );
+    } else {
+      // Add new plan
+      setSubscriptionPlans([
+        ...subscriptionPlans,
+        {
+          ...planFormData,
+          id: Date.now().toString()
+        }
+      ]);
+    }
+    setPlanFormVisible(false);
+    setEditingPlan(null);
+  };
+
+  const handleAddPriceOption = () => {
+    setPlanFormData({
+      ...planFormData,
+      prices: [
+        ...planFormData.prices,
+        {
+          country: '',
+          language: '',
+          currency: 'USD',
+          symbol: '$',
+          monthly: 0,
+          annual: 0,
+          discountPercentage: 20
+        }
+      ]
+    });
+  };
+
+  const handleRemovePriceOption = (index) => {
+    setPlanFormData({
+      ...planFormData,
+      prices: planFormData.prices.filter((_, i) => i !== index)
+    });
+  };
+
+  const handlePriceChange = (index, field, value) => {
+    const updatedPrices = [...planFormData.prices];
+    updatedPrices[index] = {
+      ...updatedPrices[index],
+      [field]: value
+    };
+    setPlanFormData({
+      ...planFormData,
+      prices: updatedPrices
+    });
+  };
+
+  // Add new state for notification preferences and modal visibility
+  const [notificationSettings, setNotificationSettings] = useState({
+    emailNotifications: {
+      newMerchant: true,
+      newOrder: true,
+      lowInventory: false,
+      systemAlerts: true,
+      marketingCampaigns: false,
+      billingUpdates: true,
+      customerSupport: true,
+    },
+    alertThresholds: {
+      inventoryLevel: 10,
+      revenueChange: 15,
+      userSignups: 50,
+      errorRate: 5
+    }
+  });
+  
+  const [notificationModalVisible, setNotificationModalVisible] = useState(false);
+  const [thresholdDrawerVisible, setThresholdDrawerVisible] = useState(false);
+  const [currentEditingSetting, setCurrentEditingSetting] = useState(null);
+
+  // Add state for about page content
+  const [aboutPageContent, setAboutPageContent] = useState({
+    hero: {
+      heading: "Welcome to Kokomatto Virtual Try-On",
+      subheading: "Experience the future of online shopping with our 3D virtual fitting room"
+    },
+    story: {
+      heading: "Our Story",
+      content: "Founded in 2022, Kokomatto began with a simple idea: make online clothes shopping as reliable as in-store fitting rooms. Our team of fashion enthusiasts and tech innovators came together to solve one of e-commerce's biggest challenges - knowing how clothes will look and fit before buying.",
+      image: "https://images.unsplash.com/photo-1529156069898-49953e39b3ac?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80"
+    }
+  });
+
+  // Add state for contact page content
+  const [contactPageContent, setContactPageContent] = useState({
+    countries: [
+      { code: 'us', name: 'United States', whatsapp: '+1 234 567 8901' },
+      { code: 'uk', name: 'United Kingdom', whatsapp: '+44 1234 567890' },
+      { code: 'ca', name: 'Canada', whatsapp: '+1 234 567 8902' },
+      { code: 'au', name: 'Australia', whatsapp: '+61 2 3456 7890' },
+    ],
+    contactEmails: {
+      general: 'contact@kokomatto.com',
+      support: 'support@kokomatto.com',
+      business: 'business@kokomatto.com',
+    },
+    mainWhatsAppNumber: '+1 234 567 8900',
+  });
+
+  // Social Media Management State
+  const [socialMediaLinks, setSocialMediaLinks] = useState([
+    { id: '1', platform: 'facebook', name: 'Facebook', url: 'https://facebook.com/kokomatto', icon: 'facebook', enabled: true },
+    { id: '2', platform: 'instagram', name: 'Instagram', url: 'https://instagram.com/kokomatto', icon: 'instagram', enabled: true },
+    { id: '3', platform: 'twitter', name: 'Twitter', url: 'https://twitter.com/kokomatto', icon: 'twitter', enabled: true },
+    { id: '4', platform: 'linkedin', name: 'LinkedIn', url: 'https://linkedin.com/company/kokomatto', icon: 'linkedin', enabled: false },
+    { id: '5', platform: 'youtube', name: 'YouTube', url: 'https://youtube.com/kokomatto', icon: 'youtube', enabled: true },
+  ]);
+  const [socialMediaFormVisible, setSocialMediaFormVisible] = useState(false);
+  const [editingSocialMedia, setEditingSocialMedia] = useState(null);
+  const [socialMediaFormData, setSocialMediaFormData] = useState({
+    platform: '',
+    name: '',
+    url: '',
+    icon: '',
+    enabled: true
+  });
+
+  // Social media management handlers
+  const handleAddSocialMedia = () => {
+    setSocialMediaFormData({
+      platform: '',
+      name: '',
+      url: '',
+      icon: '',
+      enabled: true
+    });
+    setEditingSocialMedia(null);
+    setSocialMediaFormVisible(true);
+  };
+
+  const handleEditSocialMedia = (socialMediaId) => {
+    const socialMedia = socialMediaLinks.find(sm => sm.id === socialMediaId);
+    if (socialMedia) {
+      setSocialMediaFormData({...socialMedia});
+      setEditingSocialMedia(socialMediaId);
+      setSocialMediaFormVisible(true);
+    }
+  };
+
+  const handleSaveSocialMedia = () => {
+    if (editingSocialMedia) {
+      // Update existing social media
+      setSocialMediaLinks(
+        socialMediaLinks.map(sm => 
+          sm.id === editingSocialMedia 
+            ? { ...socialMediaFormData, id: editingSocialMedia } 
+            : sm
+        )
+      );
+    } else {
+      // Add new social media
+      setSocialMediaLinks([
+        ...socialMediaLinks,
+        {
+          ...socialMediaFormData,
+          id: Date.now().toString()
+        }
+      ]);
+    }
+    setSocialMediaFormVisible(false);
+    setEditingSocialMedia(null);
+    message.success(`Social media ${editingSocialMedia ? 'updated' : 'added'} successfully!`);
+  };
+
+  const handleDeleteSocialMedia = (socialMediaId) => {
+    setSocialMediaLinks(socialMediaLinks.filter(sm => sm.id !== socialMediaId));
+    message.success('Social media link deleted successfully!');
+  };
+
+  const handleToggleSocialMediaStatus = (socialMediaId) => {
+    setSocialMediaLinks(
+      socialMediaLinks.map(sm => 
+        sm.id === socialMediaId 
+          ? { ...sm, enabled: !sm.enabled } 
+          : sm
+      )
+    );
+    message.success('Social media status updated!');
+  };
+
+  // SEO Management State
+  const [seoSettings, setSeoSettings] = useState({
+    languages: [
+      { code: 'en', name: 'English', active: true },
+      { code: 'es', name: 'Spanish', active: false },
+      { code: 'fr', name: 'French', active: false },
+      { code: 'de', name: 'German', active: false }
+    ],
+    pages: [
+      {
+        id: 1,
+        title: 'Home Page',
+        url: '/',
+        template: 'Homepage',
+        languages: [
+          {
+            code: 'en',
+            keywords: 'fashion, try-on, virtual fitting room, 3D clothing',
+            description: 'Virtual try-on platform for fashion enthusiasts. Experience 3D clothing visualization.'
+          }
+        ],
+        createdAt: '2023-10-15'
+      },
+      {
+        id: 2,
+        title: 'About Us',
+        url: '/about',
+        template: 'About',
+        languages: [
+          {
+            code: 'en',
+            keywords: 'about us, company, mission, vision, 3D try-on technology',
+            description: 'Learn about our mission to revolutionize online shopping with 3D try-on technology.'
+          }
+        ],
+        createdAt: '2023-10-16'
+      }
+    ]
+  });
+  
+  const [newLanguage, setNewLanguage] = useState({ code: '', name: '' });
+  const [newPage, setNewPage] = useState({ 
+    title: '', 
+    url: '', 
+    template: 'Standard', 
+    languages: [] 
+  });
+  const [showAddLanguageModal, setShowAddLanguageModal] = useState(false);
+  const [showCreatePageModal, setShowCreatePageModal] = useState(false);
+  const [editingSeoPage, setEditingSeoPage] = useState(null);
+  const [seoSearchTerm, setSeoSearchTerm] = useState('');
+  const [selectedPageToDuplicate, setSelectedPageToDuplicate] = useState(null);
+  // Add missing message state
+  const [message, setMessage] = useState(null);
+  
+  // Add missing state variables
+  const [pages, setPages] = useState([
+    { id: 1, name: 'Home', slug: 'home', lastEdited: '2023-05-15' },
+    { id: 2, name: 'Categories', slug: 'categories', lastEdited: '2023-06-10' },
+    { id: 3, name: 'Product', slug: 'product', lastEdited: '2023-06-22' },
+    { id: 4, name: 'Privacy Policy', slug: 'privacy', lastEdited: '2023-04-30' },
+    { id: 5, name: 'Terms of Service', slug: 'terms', lastEdited: '2023-04-30' }
+  ]);
+  const [pageFormVisible, setPageFormVisible] = useState(false);
+  const [pageFormData, setPageFormData] = useState({
+    title: '',
+    slug: '',
+    content: '',
+    isNavigationEnabled: false,
+    navigationPosition: 'main',
+    type: 'content',
+    status: 'published'
+  });
+  const [editingSeo, setEditingSeo] = useState(null);
+  
+  const [reviews, setReviews] = useState({
+    customer: [],
+    merchant: []
+  });
+  
+  const [activeReviewTab, setActiveReviewTab] = useState('all');
+  
+  // State for pages management
+  const [editingPage, setEditingPage] = useState(null);
+  const [searchPageTerm, setSearchPageTerm] = useState('');
+  
+  // State for Help Center
+  const [helpCenterVisible, setHelpCenterVisible] = useState(false);
+  const [activeHelpCategory, setActiveHelpCategory] = useState('getting-started');
+  
+  // Add state for analytics tracking
+  const [analyticsData, setAnalyticsData] = useState({
+    merchantSites: 0,
+    totalClicks: 0,
+    conversion: 0,
+    affiliateLinks: [],
+    totalAffiliates: 0,
+    activeAffiliates: 0,
+    totalConversions: 0,
+    conversionRate: 0,
+    bounceRate: 0,
+    averageOrderValue: 0,
+    totalSubscribers: 0,
+    activeSubscriptions: 0,
+    churnRate: 0,
+    revenuePerSubscriber: 0,
+    totalUsers: 0,
+    activeUsers: 0
+  });
+  
+  const [analyticsFilters, setAnalyticsFilters] = useState({
+    dateRange: 'last30days',
+    merchantId: 'all',
+    affiliateId: 'all',
+    subscriptionType: 'all',
+    region: 'all'
+  });
+  
+  const [analyticsTab, setAnalyticsTab] = useState('overview');
+  
+  // Subscription management state
+  const [subscriptions, setSubscriptions] = useState([
+    { 
+      userId: '1', 
+      name: 'Sarah Johnson',
+      email: 'sarah@example.com',
+      plan: 'Professional',
+      status: 'Active',
+      startDate: '2023-01-15',
+      renewalDate: '2023-11-15',
+      billingCycle: 'Monthly',
+      amount: '$149',
+      paymentMethod: 'Credit Card (•••• 4242)'
+    },
+    { 
+      userId: '2', 
+      name: 'Alex Brown',
+      email: 'alex@example.com',
+      plan: 'Basic',
+      status: 'Active',
+      startDate: '2023-02-20',
+      renewalDate: '2023-11-20',
+      billingCycle: 'Monthly',
+      amount: '$49',
+      paymentMethod: 'PayPal'
+    },
+    { 
+      userId: '3', 
+      name: 'Emily Chen',
+      email: 'emily@example.com',
+      plan: 'Enterprise',
+      status: 'Active',
+      startDate: '2023-01-10',
+      renewalDate: '2024-01-10',
+      billingCycle: 'Annual',
+      amount: '$3,490',
+      paymentMethod: 'Credit Card (•••• 7890)'
+    },
+    { 
+      userId: '4', 
+      name: 'Michael Wilson',
+      email: 'michael@example.com',
+      plan: 'Professional',
+      status: 'Past Due',
+      startDate: '2023-03-05',
+      renewalDate: '2023-10-05',
+      billingCycle: 'Monthly',
+      amount: '$149',
+      paymentMethod: 'Credit Card (•••• 6543)'
+    },
+    { 
+      userId: '5', 
+      name: 'Jessica Miller',
+      email: 'jessica@example.com',
+      plan: 'Professional',
+      status: 'Cancelled',
+      startDate: '2023-02-12',
+      renewalDate: '2023-10-12',
+      cancelledAt: '2023-09-25',
+      billingCycle: 'Monthly',
+      amount: '$149',
+      paymentMethod: 'Credit Card (•••• 1234)'
+    }
+  ]);
+
+  const [selectedUserId, setSelectedUserId] = useState(null);
+  const [showSubscriptionDetails, setShowSubscriptionDetails] = useState(false);
+  const [showPlanChangeConfirmation, setShowPlanChangeConfirmation] = useState(false);
+  const [showCancelConfirmation, setShowCancelConfirmation] = useState(false);
+  const [cancelUserId, setCancelUserId] = useState(null);
+  
+  // Add missing state variables for subscription management
+  const [viewingSubscription, setViewingSubscription] = useState(null);
+  const [changingSubscriptionPlan, setChangingSubscriptionPlan] = useState(null);
+  const [cancelingSubscription, setCancelingSubscription] = useState(null);
+  const [cancelTime, setCancelTime] = useState('end_of_period');
+  const [cancelReason, setCancelReason] = useState('');
+
+  const [categoryArticles, setCategoryArticles] = useState([
+    {
+      id: 'article-1',
+      title: 'How to Choose the Right Size',
+      category: 'clothing',
+      summary: 'A comprehensive guide to finding your perfect fit',
+      content: '<h2>Finding Your Perfect Fit</h2><p>Getting the right size when shopping online can be challenging. This guide will help you take accurate measurements and choose the perfect size every time.</p>',
+      image: 'https://images.unsplash.com/photo-1551488831-00ddcb6c6bd3?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3',
+      status: 'published',
+      createdAt: '2023-10-20T10:00:00Z',
+      updatedAt: '2023-10-20T10:00:00Z'
+    },
+    {
+      id: 'article-2',
+      title: 'Care Guide for Leather Footwear',
+      category: 'footwear',
+      summary: 'Learn how to maintain and extend the life of your leather shoes',
+      content: '<h2>Leather Footwear Care</h2><p>Proper care of leather shoes can extend their life significantly. This guide covers cleaning, conditioning, and storing techniques for all types of leather footwear.</p>',
+      image: 'https://images.unsplash.com/photo-1603808033192-082d6919d3e1?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3',
+      status: 'published',
+      createdAt: '2023-10-15T09:30:00Z',
+      updatedAt: '2023-10-15T09:30:00Z'
+    }
+  ]);
+
+  // Add these state variables for category display settings
+  const [showCategoryDisplaySettings, setShowCategoryDisplaySettings] = useState(false);
+  const [categoryDisplaySettings, setCategoryDisplaySettings] = useState({
+    desktop: 8,
+    tablet: 4,
+    mobile: 2
+  });
+
+  // Add this handler for saving the category display settings
+  const handleSaveCategoryDisplaySettings = () => {
+    // Save to localStorage so HomePage can access it
+    localStorage.setItem('categoryDisplaySettings', JSON.stringify(categoryDisplaySettings));
+    message.success('Category display settings saved successfully!');
+    setShowCategoryDisplaySettings(false);
+  };
+
+  const handleViewSubscription = (userId) => {
+    setSelectedUserId(userId);
+    setShowSubscriptionDetails(true);
+  };
+
+  const handleChangeSubscriptionPlan = (userId, plan) => {
+    // In a real application, this would make an API call to update the subscription
+    setSubscriptions(
+      subscriptions.map(sub => 
+        sub.userId === userId 
+          ? { ...sub, plan: plan, updatedAt: new Date().toISOString() } 
+          : sub
+      )
+    );
+    setShowPlanChangeConfirmation(true);
+    setTimeout(() => setShowPlanChangeConfirmation(false), 3000);
+  };
+
+  const handleCancelSubscription = (userId) => {
+    // In a real application, this would make an API call to cancel the subscription
+    setCancelUserId(userId);
+    setShowCancelConfirmation(true);
+  };
+
+  const confirmCancelSubscription = () => {
+    setSubscriptions(
+      subscriptions.map(sub => 
+        sub.userId === cancelUserId 
+          ? { ...sub, status: 'Cancelled', cancelledAt: new Date().toISOString() } 
+          : sub
+      )
+    );
+    setShowCancelConfirmation(false);
+    setCancelUserId(null);
+  };
+  
+  // Listen for auth change events
+  useEffect(() => {
+    const handleAuthChange = () => {
+      const authStatus = localStorage.getItem('isAuthenticated') === 'true';
+      const role = localStorage.getItem('userRole') || '';
+      setIsAuthenticated(authStatus);
+      setUserRole(role);
+    };
+    
+    window.addEventListener('auth-change', handleAuthChange);
+    
+    return () => {
+      window.removeEventListener('auth-change', handleAuthChange);
+    };
+  }, []);
+
+  // Redirect if not authenticated or not admin
+  useEffect(() => {
+    if (!isAuthenticated) {
+      navigate('/', { replace: true });
+    } else if (userRole !== 'admin') {
+      // Redirect non-admin users to their appropriate pages
+      if (userRole === 'merchant') {
+        navigate('/merchants', { replace: true });
+      } else if (userRole === 'user') {
+        navigate('/home', { replace: true });
+      }
+    }
+  }, [isAuthenticated, userRole, navigate]);
+
+  // Update activeTab based on URL path
+  useEffect(() => {
+    // Extract the active tab from the URL path
+    const path = location.pathname;
+    console.log('Current path:', path);
+    
+    if (path === '/admin') {
+      setActiveTab('overview');
+    } else {
+      // Get the last part of the URL path (e.g., /admin/reviews -> reviews)
+      const tab = path.split('/').pop();
+      if (tab) {
+        console.log('Setting active tab from URL:', tab);
+        setActiveTab(tab);
+      }
+    }
+  }, [location.pathname]);
+
+  // Add this new useEffect to specifically handle loading of contact content
+  useEffect(() => {
+    // If the active tab is 'contact' and the user is authenticated as admin
+    if (activeTab === 'contact' && isAuthenticated && userRole === 'admin') {
+      console.log('Contact tab is active, ensuring contact content is loaded');
+      // If you have an API call to load contact data, you would make it here
+      // For now, we'll just ensure the contactPageContent is properly initialized
+      if (!contactPageContent || !contactPageContent.countries) {
+        setContactPageContent({
+          countries: [
+            { code: 'us', name: 'United States', whatsapp: '+1 234 567 8901' },
+            { code: 'uk', name: 'United Kingdom', whatsapp: '+44 1234 567890' },
+            { code: 'ca', name: 'Canada', whatsapp: '+1 234 567 8902' },
+            { code: 'au', name: 'Australia', whatsapp: '+61 2 3456 7890' },
+          ],
+          contactEmails: {
+            general: 'contact@kokomatto.com',
+            support: 'support@kokomatto.com',
+            business: 'business@kokomatto.com',
+          },
+          mainWhatsAppNumber: '+1 234 567 8900',
+        });
+      }
+    }
+  }, [activeTab, isAuthenticated, userRole, contactPageContent]);
+
+  // Load reviews from localStorage
+  useEffect(() => {
+    try {
+      const customerReviews = JSON.parse(localStorage.getItem('tryOnReviews') || '[]');
+      const merchantReviews = JSON.parse(localStorage.getItem('merchantReviews') || '[]');
+      
+      console.log('Loaded reviews from localStorage:', 
+        { customer: customerReviews.length, merchant: merchantReviews.length });
+      
+      setReviews({
+        customer: customerReviews,
+        merchant: merchantReviews
+      });
+    } catch (error) {
+      console.error('Error loading reviews from localStorage:', error);
+      // Initialize with empty arrays if there's an error
+      setReviews({
+        customer: [],
+        merchant: []
+      });
+    }
+  }, []);
+
+  const stats = [
+    { id: 1, name: 'Total Merchants', value: '324', change: '+12%', changeType: 'increase' },
+    { id: 2, name: 'Monthly Revenue', value: '$43,241', change: '+18%', changeType: 'increase' },
+    { id: 3, name: 'Active Users', value: '2,847', change: '+7%', changeType: 'increase' },
+    { id: 4, name: 'Try-On Sessions', value: '128,392', change: '+24%', changeType: 'increase' },
+  ];
+
+  const recentMerchants = [
+    { id: 1, name: 'Fashion Retailer Co.', date: 'Jun 3, 2023', plan: 'Enterprise', status: 'Active' },
+    { id: 2, name: 'Urban Styles LLC', date: 'Jun 2, 2023', plan: 'Professional', status: 'Active' },
+    { id: 3, name: 'Trendy Apparel', date: 'Jun 1, 2023', plan: 'Basic', status: 'Trial' },
+    { id: 4, name: 'Fashion Forward', date: 'May 31, 2023', plan: 'Professional', status: 'Active' },
+    { id: 5, name: 'Style Innovators', date: 'May 30, 2023', plan: 'Enterprise', status: 'Active' },
+  ];
+
+  // Add these new data structures for categories and homepage content management
+  const [categories, setCategories] = useState([
+    { 
+      id: 'clothing', 
+      name: 'Clothing', 
+      image: 'https://images.unsplash.com/photo-1617137968427-85924c800a22?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3', 
+      description: 'Virtual try-on for apparel',
+      htmlDescription: '<p>Virtual try-on for a wide range of <strong>apparel</strong> items.</p>', 
+      parentCategoryId: '',
+      displaySettings: {
+        desktop: 4,
+        tablet: 3,
+        mobile: 2
+      },
+      articles: [
+        {
+          id: 'clothing-guide-1',
+          title: 'How to Use Virtual Try-On For Clothing',
+          image: 'https://images.unsplash.com/photo-1490481651-ab68de25d43d?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3',
+          summary: 'A comprehensive guide to using virtual try-on technology for clothing items',
+          content: '<h2>Getting Started with Virtual Try-On</h2><p>This article explains how to get the most out of your virtual try-on experience for clothing items.</p>',
+          status: 'published',
+          createdAt: '2023-10-15T08:00:00Z'
+        }
+      ]
+    },
+    { 
+      id: 'mens-clothing', 
+      name: 'Men\'s Clothing', 
+      image: 'https://images.unsplash.com/photo-1617137984095-74e4e5e3613f?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3', 
+      description: 'Virtual try-on for shirts, suits, pants and more men\'s apparel',
+      htmlDescription: '<p>Try on men\'s shirts, suits, pants and more from popular brands.</p><ul><li>Shirts</li><li>Suits</li><li>Pants</li><li>Accessories</li></ul>', 
+      parentCategoryId: 'clothing',
+      displaySettings: {
+        desktop: 3,
+        tablet: 2,
+        mobile: 1
+      },
+      articles: []
+    },
+    { 
+      id: 'womens-clothing', 
+      name: 'Women\'s Clothing', 
+      image: 'https://images.unsplash.com/photo-1525507119028-ed4c629a60a3?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3', 
+      description: 'See how dresses, blouses, skirts and other women\'s items fit your shape',
+      htmlDescription: '<p>See how dresses, blouses, skirts and other women\'s items fit your unique shape with our advanced 3D modeling.</p>', 
+      parentCategoryId: 'clothing',
+      displaySettings: {
+        desktop: 3,
+        tablet: 2,
+        mobile: 1
+      },
+      articles: []
+    },
+    { 
+      id: 'footwear', 
+      name: 'Footwear', 
+      image: 'https://images.unsplash.com/photo-1549298916-b41d501d3772?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3', 
+      description: 'Try on shoes, boots, and sandals to find your perfect fit',
+      htmlDescription: '<p>Try on shoes, boots, and sandals to find your perfect fit using our AR technology.</p>', 
+      parentCategoryId: '',
+      displaySettings: {
+        desktop: 4,
+        tablet: 3,
+        mobile: 2
+      },
+      articles: []
+    },
+    { 
+      id: 'mens-footwear', 
+      name: 'Men\'s Footwear', 
+      image: 'https://images.unsplash.com/photo-1549298916-f52d724204b4?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3', 
+      description: 'Try on men\'s shoes, boots, and sandals',
+      htmlDescription: '<p>Virtual try-on for men\'s shoes, boots, and sandals with size recommendations.</p>', 
+      parentCategoryId: 'footwear',
+      displaySettings: {
+        desktop: 3,
+        tablet: 2,
+        mobile: 1
+      },
+      articles: []
+    },
+    { 
+      id: 'womens-footwear', 
+      name: 'Women\'s Footwear', 
+      image: 'https://images.unsplash.com/photo-1543163521-1bf539c55dd2?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3', 
+      description: 'Try on women\'s shoes, boots, and sandals',
+      htmlDescription: '<p>Virtual try-on for women\'s shoes, boots, sandals and heels with accurate fit prediction.</p>', 
+      parentCategoryId: 'footwear',
+      displaySettings: {
+        desktop: 3,
+        tablet: 2,
+        mobile: 1
+      },
+      articles: []
+    },
+    { 
+      id: 'accessories', 
+      name: 'Accessories', 
+      image: 'https://images.pexels.com/photos/1927259/pexels-photo-1927259.jpeg?auto=compress&cs=tinysrgb&w=800', 
+      description: 'Virtual try-on for glasses, watches, jewelry and more',
+      htmlDescription: '<p>Virtual try-on for <em>glasses</em>, <em>watches</em>, <em>jewelry</em> and more accessories to complete your look.</p>', 
+      parentCategoryId: '',
+      displaySettings: {
+        desktop: 5,
+        tablet: 3,
+        mobile: 2
+      },
+      articles: []
+    },
+    { 
+      id: 'athletic', 
+      name: 'Athletic Wear', 
+      image: 'https://images.unsplash.com/photo-1576633587382-13ddf37b1fc1?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3', 
+      description: 'Try on activewear, sports jerseys, and workout gear',
+      htmlDescription: '<p>Try on <strong>activewear</strong>, sports jerseys, and workout gear from top athletic brands.</p>', 
+      parentCategoryId: '',
+      displaySettings: {
+        desktop: 4,
+        tablet: 3,
+        mobile: 2
+      },
+      articles: []
+    },
+  ]);
+  
+  const [homepageContent, setHomepageContent] = useState({
+    banner: {
+      enabled: true,
+      text: 'Coming soon',
+      backgroundColor: 'indigo-900/30',
+      textColor: 'white',
+    },
+    hero: {
+      backgroundImage: 'https://i.ibb.co/7dj7Mzxw/254ee928-3668-4738-b91c-ff9fc20a4e76.jpg',
+      backgroundType: 'image', // 'image' or 'video'
+      videoUrl: '',
+      height: '65vh',
+      overlay: true,
+      overlayOpacity: '50',
+    },
+    featureSection: {
+      enabled: true,
+      title: 'Revolutionize',
+      subtitle: 'E-Commerce with 3D Try-On',
+      description: 'Increase sales and reduce returns with our cutting-edge 3D virtual try-on API. Let customers try before they buy, directly on your e-commerce platform.',
+    }
+  });
+
+  // Function to handle category addition
+  const handleCategoryAdd = (newCategory) => {
+    // Create a unique ID based on the name
+    const categoryId = newCategory.name.toLowerCase().replace(/\s+/g, '-');
+    
+    // Ensure the ID is unique
+    const makeUniqueId = (baseId, iteration = 0) => {
+      const proposedId = iteration === 0 ? baseId : `${baseId}-${iteration}`;
+      return categories.some(cat => cat.id === proposedId) 
+        ? makeUniqueId(baseId, iteration + 1) 
+        : proposedId;
+    };
+    
+    const uniqueId = makeUniqueId(categoryId);
+    
+    // Ensure all required properties exist
+    const sanitizedCategory = {
+      ...newCategory,
+      id: uniqueId,
+      displaySettings: newCategory.displaySettings || {
+        desktop: 4,
+        tablet: 3,
+        mobile: 2
+      },
+      articles: newCategory.articles || []
+    };
+    
+    setCategories([...categories, sanitizedCategory]);
+    setIsAddingCategory(false);
+  };
+  
+  // Function to handle category update
+  const handleCategoryUpdate = (updatedCategory) => {
+    // Ensure all required properties exist
+    const sanitizedCategory = {
+      ...updatedCategory,
+      displaySettings: updatedCategory.displaySettings || {
+        desktop: 4,
+        tablet: 3,
+        mobile: 2
+      },
+      articles: updatedCategory.articles || []
+    };
+    
+    setCategories(categories.map(cat => 
+      cat.id === sanitizedCategory.id ? sanitizedCategory : cat
+    ));
+    setEditingCategory(null);
+    
+    // Update any child categories if this category is being removed as a parent
+    if (sanitizedCategory.parentCategoryId !== updatedCategory.parentCategoryId) {
+      const childCategories = categories.filter(cat => cat.parentCategoryId === updatedCategory.id);
+      if (childCategories.length > 0) {
+        // Reset parent relationship for any children if this was previously a parent
+        const updatedChildCategories = childCategories.map(child => ({
+          ...child,
+          parentCategoryId: ''
+        }));
+        
+        // Create a new categories array with updated children
+        setCategories(prevCategories => 
+          prevCategories.map(cat => 
+            updatedChildCategories.some(child => child.id === cat.id) 
+              ? updatedChildCategories.find(child => child.id === cat.id) 
+              : cat
+          )
+        );
+      }
+    }
+  };
+  
+  // Function to handle category deletion
+  const handleCategoryDelete = (categoryId) => {
+    setCategories(categories.filter(cat => cat.id !== categoryId));
+  };
+  
+  // Function to handle homepage content update
+  const handleHomepageContentUpdate = (section, updatedContent) => {
+    setHomepageContent({
+      ...homepageContent,
+      [section]: updatedContent
+    });
+    setEditingHomeSection(null);
+  };
+
+  const handlePopupUpdate = (updatedPopup) => {
+    setPopups(popups.map(popup => 
+      popup.id === updatedPopup.id ? updatedPopup : popup
+    ));
+    setEditingPopup(null);
+    setShowPopupForm(false);
+  };
+
+  const handlePopupAdd = (newPopup) => {
+    setPopups([...popups, { ...newPopup, id: Date.now().toString() }]);
+    setShowPopupForm(false);
+  };
+
+  const handlePopupDelete = (popupId) => {
+    setPopups(popups.filter(popup => popup.id !== popupId));
+  };
+
+  // Navigation handlers - Updated for proper state preservation
+  const navigateToTab = (tab) => {
+    setActiveTab(tab);
+    
+    // Update URL based on the active tab
+    if (tab === 'overview') {
+      navigate('/admin');
+    } else {
+      navigate(`/admin/${tab}`);
+    }
+  };
+
+  // Handler functions for merchant management
+  const handleEditMerchant = (merchantName) => {
+    console.log(`Editing merchant: ${merchantName}`);
+    // Implement merchant editing logic
+  };
+
+  const handleSuspendMerchant = (merchantName) => {
+    if (window.confirm(`Are you sure you want to suspend ${merchantName}?`)) {
+      console.log(`Suspending merchant: ${merchantName}`);
+      // Implement merchant suspension logic
+    }
+  };
+
+  // Handler functions for affiliate management
+  const handleEditAffiliate = (affiliateName) => {
+    console.log(`Editing affiliate: ${affiliateName}`);
+    // Implement affiliate editing logic
+  };
+
+  const handleDeactivateAffiliate = (affiliateName) => {
+    if (window.confirm(`Are you sure you want to deactivate ${affiliateName}?`)) {
+      console.log(`Deactivating affiliate: ${affiliateName}`);
+      // Implement affiliate deactivation logic
+    }
+  };
+
+  // Enhanced handler for editing notification settings
+  const handleEditSetting = (settingName, currentValue) => {
+    setCurrentEditingSetting({ name: settingName, value: currentValue });
+    
+    if (settingName === 'EmailNotifications') {
+      setNotificationModalVisible(true);
+    } else if (settingName === 'AlertThresholds') {
+      setThresholdDrawerVisible(true);
+    } else {
+      message.success(`${settingName} settings opened for editing`);
+      console.log(`Editing setting: ${settingName}, current value: ${currentValue}`);
+    }
+  };
+  
+  // Enhanced handler for email notification changes
+  const handleEmailNotificationChange = (notificationType, checked) => {
+    setNotificationSettings(prev => ({
+      ...prev,
+      emailNotifications: {
+        ...prev.emailNotifications,
+        [notificationType]: checked
+      }
+    }));
+  };
+
+  // Handler for alert threshold changes
+  const handleThresholdChange = (thresholdType, value) => {
+    setNotificationSettings(prev => ({
+      ...prev,
+      alertThresholds: {
+        ...prev.alertThresholds,
+        [thresholdType]: value
+      }
+    }));
+  };
+
+  // Save notification settings
+  const saveNotificationSettings = () => {
+    message.success('Notification preferences saved successfully');
+    setNotificationModalVisible(false);
+    // Here you would typically make an API call to save the changes
+  };
+
+  // Save threshold settings
+  const saveThresholdSettings = () => {
+    message.success('Alert thresholds updated successfully');
+    setThresholdDrawerVisible(false);
+    // Here you would typically make an API call to save the changes
+  };
+
+  // Handler for toggling maintenance mode
+  const handleToggleMaintenance = (enabled) => {
+    if (enabled) {
+      message.success('Maintenance mode enabled');
+    } else {
+      message.success('Maintenance mode disabled');
+    }
+    console.log(`Maintenance mode ${enabled ? 'enabled' : 'disabled'}`);
+    // Here you would typically make an API call to update the setting
+  };
+
+  // Handler for viewing API dashboard
+  const handleViewApiDashboard = () => {
+    message.success('Opening API Dashboard');
+    console.log('Navigating to API Dashboard');
+    // Here you would typically navigate to the API dashboard
+    // navigate('/admin/api-dashboard');
+  };
+
+  // Add customer management handlers
+  const handleViewCustomerOrders = (customerName) => {
+    console.log(`Viewing orders for customer: ${customerName}`);
+    message.success(`Loading orders for ${customerName}`);
+    // Implement order viewing logic
+  };
+
+  // Function to handle about page content update
+  const handleAboutPageSave = (updatedContent) => {
+    setAboutPageContent(updatedContent);
+    // In a real application, you would make an API call here to save the data
+    message.success('About page content updated successfully');
+  };
+
+  const handleContactPageUpdate = (updatedContent) => {
+    try {
+      // Validate updatedContent
+      if (!updatedContent || !updatedContent.countries || !updatedContent.contactEmails) {
+        throw new Error('Invalid contact page data format');
+      }
+      
+      // Set the content
+      setContactPageContent(updatedContent);
+      
+      // In a real application, you would make an API call here to save the data
+      console.log('Contact page updated with:', updatedContent);
+      
+      // Show success message
+      message.success('Contact page information updated successfully');
+      
+      // Navigate back to ensure state is refreshed properly
+      navigateToTab('contact');
+    } catch (error) {
+      console.error('Error updating contact page:', error);
+      message.error('Failed to update contact information: ' + error.message);
+    }
+  };
+
+  // SEO Management Handlers
+  const handleAddLanguage = () => {
+    if (newLanguage.code && newLanguage.name) {
+      setSeoSettings(prev => ({
+        ...prev,
+        languages: [...prev.languages, { ...newLanguage, active: false }]
+      }));
+      setNewLanguage({ code: '', name: '' });
+      setShowAddLanguageModal(false);
+      setMessage({ type: 'success', text: 'Language added successfully!' });
+      setTimeout(() => setMessage(null), 3000);
+    }
+  };
+
+  const handleToggleLanguage = (code) => {
+    setSeoSettings(prev => ({
+      ...prev,
+      languages: prev.languages.map(lang => 
+        lang.code === code ? { ...lang, active: !lang.active } : lang
+      )
+    }));
+    setMessage({ type: 'success', text: 'Language status updated!' });
+    setTimeout(() => setMessage(null), 3000);
+  };
+
+  const handleCreatePage = () => {
+    const activeLanguages = seoSettings.languages.filter(l => l.active);
+    const pageLanguages = activeLanguages.map(lang => ({
+      code: lang.code,
+      keywords: '',
+      description: ''
+    }));
+
+    const newPageWithId = {
+      ...newPage,
+      id: seoSettings.pages.length + 1,
+      languages: pageLanguages,
+      createdAt: new Date().toISOString().split('T')[0]
+    };
+
+    setSeoSettings(prev => ({
+      ...prev,
+      pages: [...prev.pages, newPageWithId]
+    }));
+    
+    setNewPage({ title: '', url: '', template: 'Standard', languages: [] });
+    setShowCreatePageModal(false);
+    setMessage({ type: 'success', text: 'Page created successfully!' });
+    setTimeout(() => setMessage(null), 3000);
+  };
+
+  const handleDuplicatePage = (pageId) => {
+    const pageToDuplicate = seoSettings.pages.find(p => p.id === pageId);
+    if (pageToDuplicate) {
+      const duplicatedPage = {
+        ...pageToDuplicate,
+        id: seoSettings.pages.length + 1,
+        title: `${pageToDuplicate.title} (Copy)`,
+        url: `${pageToDuplicate.url}-copy`,
+        createdAt: new Date().toISOString().split('T')[0]
+      };
+
+      setSeoSettings(prev => ({
+        ...prev,
+        pages: [...prev.pages, duplicatedPage]
+      }));
+      
+      setMessage({ type: 'success', text: 'Page duplicated successfully!' });
+      setTimeout(() => setMessage(null), 3000);
+    }
+  };
+
+  const handleUpdatePageSeo = (pageId, langCode, field, value) => {
+    setSeoSettings(prev => ({
+      ...prev,
+      pages: prev.pages.map(page => {
+        if (page.id === pageId) {
+          return {
+            ...page,
+            languages: page.languages.map(lang => {
+              if (lang.code === langCode) {
+                return { ...lang, [field]: value };
+              }
+              return lang;
+            })
+          };
+        }
+        return page;
+      })
+    }));
+  };
+
+  const handleDeletePage = (pageId) => {
+    if (window.confirm('Are you sure you want to delete this page?')) {
+      setSeoSettings(prev => ({
+        ...prev,
+        pages: prev.pages.filter(page => page.id !== pageId)
+      }));
+      
+      setMessage({ type: 'success', text: 'Page deleted successfully!' });
+      setTimeout(() => setMessage(null), 3000);
+    }
+  };
+
+  // Chat handlers
+  const handleSelectChat = (contactId) => {
+    setActiveChat(contactId);
+    // Mark messages as read
+    setChatContacts(contacts => 
+      contacts.map(contact => 
+        contact.id === contactId ? { ...contact, unread: 0 } : contact
+      )
+    );
+  };
+  
+  const handleSendMessage = () => {
+    if (!messageInput.trim() || !activeChat) return;
+    
+    const newMessage = {
+      id: chatMessages[activeChat].length + 1,
+      sender: 'admin',
+      content: messageInput.trim(),
+      time: 'Just now'
+    };
+    
+    setChatMessages({
+      ...chatMessages,
+      [activeChat]: [...chatMessages[activeChat], newMessage]
+    });
+    
+    setMessageInput('');
+  };
+  
+  const handleFilterChats = (filter) => {
+    setChatFilter(filter);
+  };
+  
+  const handleQuickResponse = (response) => {
+    setMessageInput(response);
+  };
+  
+  const handleAddQuickResponse = (text) => {
+    if (!text.trim()) return;
+    const newResponse = {
+      id: quickResponses.length + 1,
+      text: text.trim()
+    };
+    setQuickResponses([...quickResponses, newResponse]);
+  };
+
+  // Help center FAQ data
+  const faqData = {
+    'getting-started': [
+      {
+        question: 'How do I access the dashboard?',
+        answer: 'Log in with your admin credentials, then navigate to the dashboard by clicking on the dashboard link in the navigation menu.'
+      },
+      {
+        question: 'How do I update the website content?',
+        answer: 'Each section of the website can be edited using the corresponding tab in the dashboard. For example, to edit the homepage, click on the "homepage" tab.'
+      },
+      {
+        question: 'How do I add a new category?',
+        answer: 'Navigate to the "categories" tab and click the "Add Category" button. Fill in the required information and save.'
+      }
+    ],
+    'content-management': [
+      {
+        question: 'How do I edit content with HTML?',
+        answer: 'When editing page content, you\'ll find an HTML editor option that allows you to switch between rich text editing and direct HTML code editing.'
+      },
+      {
+        question: 'Can I add custom scripts to pages?',
+        answer: 'Yes, you can add custom scripts by using the HTML editor in the "Full HTML Editor" tab when editing a page.'
+      },
+      {
+        question: 'How do I add a new page?',
+        answer: 'Go to the "pages" tab in the dashboard, then click "Add New Page". You\'ll need to provide a name, URL, and content for the page.'
+      }
+    ],
+    'user-management': [
+      {
+        question: 'How do I add a new admin user?',
+        answer: 'Navigate to the "settings" tab, then select "User Management". Click "Add User" and fill in the user details, making sure to select "Admin" as the role.'
+      },
+      {
+        question: 'How do I reset a user\'s password?',
+        answer: 'In the "settings" tab under "User Management", find the user and click the "Reset Password" button. You can then send them a password reset link.'
+      }
+    ],
+    'merchant-management': [
+      {
+        question: 'How do I approve a merchant application?',
+        answer: 'Go to the "merchants" tab and find the pending application. Review their details and click "Approve" if everything looks good.'
+      },
+      {
+        question: 'How do I suspend a merchant account?',
+        answer: 'In the "merchants" tab, find the merchant you want to suspend, click on the options menu, and select "Suspend Account". You\'ll be asked to provide a reason.'
+      }
+    ]
+  };
+  
+  // Handle page content save
+  const handlePageSave = (pageId, content) => {
+    console.log(`Saving content for page ID ${pageId}:`, content);
+    // In a real app, you would make an API call to save the content
+    setPages(prevPages => 
+      prevPages.map(page => 
+        page.id === pageId 
+          ? { ...page, lastEdited: new Date().toISOString().split('T')[0] } 
+          : page
+      )
+    );
+    message.success('Page content updated successfully');
+    setEditingPage(null);
+  };
+
+  // Analytics data fetching function
+  const fetchAnalyticsData = () => {
+    // Use the imported mock data instead of creating a complex object
+    setTimeout(() => {
+      const data = mockGetAnalyticsData();
+      setAnalyticsData(data);
+    }, 500);
+  };
+  
+  // Call fetchAnalyticsData when filters change
+  useEffect(() => {
+    fetchAnalyticsData();
+  }, [analyticsFilters]);
+  
+  // Handle analytics filter change
+  const handleAnalyticsFilterChange = (filter, value) => {
+    setAnalyticsFilters({
+      ...analyticsFilters,
+      [filter]: value
+    });
+  };
+
+  const renderTabContent = () => {
+    if (!isAuthenticated || userRole !== 'admin') return null;
+    
+    switch (activeTab) {
+      case 'overview':
+        return (
+          <Dashboard stats={stats} />
+        );
+      case 'customers':
+        return (
+          <div className="space-y-6">
+            <h3 className="text-xl font-bold text-gray-900">Customer Management</h3>
+            <div className="bg-white rounded-lg shadow overflow-hidden">
+            <div className="overflow-x-auto">
+                      <table className="min-w-full divide-y divide-gray-200">
+                        <thead className="bg-gray-50">
+                          <tr>
+                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Customer
+                            </th>
+                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                              Date Joined
+                            </th>
+                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Orders
+                    </th>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Total Spent
+                            </th>
+                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                              Status
+                            </th>
+                            <th scope="col" className="relative px-6 py-3">
+                              <span className="sr-only">Actions</span>
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody className="bg-white divide-y divide-gray-200">
+                  <tr>
+                              <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="flex items-center">
+                        <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center">
+                          <span className="text-xs font-medium">AJ</span>
+                        </div>
+                        <div className="ml-4">
+                          <div className="text-sm font-medium text-gray-900">Alex Johnson</div>
+                          <div className="text-sm text-gray-500">alex@example.com</div>
+                        </div>
+                      </div>
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-gray-500">May 12, 2023</div>
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-gray-900">24</div>
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-gray-900">$1,543.67</div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                        Active
+                                </span>
+                              </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
+                      <button 
+                        className="text-indigo-600 hover:text-indigo-900 focus:outline-none focus:underline"
+                        onClick={() => navigate(`/admin/customers/alex-johnson`)}
+                      >
+                        View
+                      </button>
+                      <button 
+                        className="text-blue-600 hover:text-blue-900 focus:outline-none focus:underline"
+                        onClick={() => handleViewCustomerOrders('Alex Johnson')}
+                      >
+                        Orders
+                      </button>
+                              </td>
+                            </tr>
+                  <tr>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="flex items-center">
+                        <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center">
+                          <span className="text-xs font-medium">SW</span>
+                    </div>
+                        <div className="ml-4">
+                          <div className="text-sm font-medium text-gray-900">Sarah Williams</div>
+                          <div className="text-sm text-gray-500">sarah@example.com</div>
+                  </div>
+                </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-gray-500">Apr 28, 2023</div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-gray-900">18</div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-gray-900">$2,102.50</div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                        Active
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
+                      <button 
+                        className="text-indigo-600 hover:text-indigo-900 focus:outline-none focus:underline"
+                        onClick={() => navigate(`/admin/customers/sarah-williams`)}
+                      >
+                        View
+                      </button>
+                      <button 
+                        className="text-blue-600 hover:text-blue-900 focus:outline-none focus:underline"
+                        onClick={() => handleViewCustomerOrders('Sarah Williams')}
+                      >
+                        Orders
+                      </button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+              </div>
+            </div>
+          </div>
+        );
+      case 'merchants':
+        return (
+          <div className="space-y-6">
+            <h3 className="text-xl font-bold text-gray-900">Merchant Management</h3>
+            <div className="bg-white rounded-lg shadow overflow-hidden">
+            <div className="overflow-x-auto">
+                    <table className="min-w-full divide-y divide-gray-200">
+                      <thead className="bg-gray-50">
+                        <tr>
+                          <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Merchant
+                          </th>
+                          <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Subscription
+                          </th>
+                          <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Monthly Revenue
+                          </th>
+                          <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Status
+                          </th>
+                          <th scope="col" className="relative px-6 py-3">
+                            <span className="sr-only">Actions</span>
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody className="bg-white divide-y divide-gray-200">
+                        <tr>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="flex items-center">
+                              <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center">
+                                <span className="text-xs font-medium">FC</span>
+                              </div>
+                              <div className="ml-4">
+                                <div className="text-sm font-medium text-gray-900">Fashion Retailer Co.</div>
+                                <div className="text-sm text-gray-500">fashion@example.com</div>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="text-sm text-gray-900">Enterprise</div>
+                            <div className="text-sm text-gray-500">10 store licenses</div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="text-sm text-gray-900">$1,200.00</div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                              Active
+                            </span>
+                          </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
+                      <button 
+                        className="text-indigo-600 hover:text-indigo-900 focus:outline-none focus:underline"
+                        onClick={() => handleEditMerchant('Fashion Retailer Co.')}
+                      >
+                        Edit
+                      </button>
+                      <button 
+                        className="text-red-600 hover:text-red-900 focus:outline-none focus:underline"
+                        onClick={() => handleSuspendMerchant('Fashion Retailer Co.')}
+                      >
+                        Suspend
+                      </button>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="flex items-center">
+                              <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center">
+                                <span className="text-xs font-medium">US</span>
+                              </div>
+                              <div className="ml-4">
+                                <div className="text-sm font-medium text-gray-900">Urban Styles LLC</div>
+                                <div className="text-sm text-gray-500">urban@example.com</div>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="text-sm text-gray-900">Professional</div>
+                            <div className="text-sm text-gray-500">5 store licenses</div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="text-sm text-gray-900">$750.00</div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                              Active
+                            </span>
+                          </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
+                      <button 
+                        className="text-indigo-600 hover:text-indigo-900 focus:outline-none focus:underline"
+                        onClick={() => handleEditMerchant('Urban Styles LLC')}
+                      >
+                        Edit
+                      </button>
+                      <button 
+                        className="text-red-600 hover:text-red-900 focus:outline-none focus:underline"
+                        onClick={() => handleSuspendMerchant('Urban Styles LLC')}
+                      >
+                        Suspend
+                      </button>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+              </div>
+            </div>
+          </div>
+        );
+      case 'affiliates':
+        return (
+          <div className="space-y-6">
+            <h3 className="text-xl font-bold text-gray-900">Affiliate Management</h3>
+            <div className="overflow-x-auto">
+                    <table className="min-w-full divide-y divide-gray-200">
+                      <thead className="bg-gray-50">
+                        <tr>
+                          <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Affiliate
+                          </th>
+                          <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Referrals
+                          </th>
+                          <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Commission Rate
+                          </th>
+                          <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Total Earned
+                          </th>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Status
+                    </th>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Join Date
+                          </th>
+                          <th scope="col" className="relative px-6 py-3">
+                            <span className="sr-only">Actions</span>
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody className="bg-white divide-y divide-gray-200">
+                        <tr>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="flex items-center">
+                              <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center">
+                                <span className="text-xs font-medium">JD</span>
+                              </div>
+                              <div className="ml-4">
+                                <div className="text-sm font-medium text-gray-900">John Doe</div>
+                                <div className="text-sm text-gray-500">john@example.com</div>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="text-sm text-gray-900">42</div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="text-sm text-gray-900">15%</div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="text-sm text-gray-900">$3,850.75</div>
+                          </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                        Active
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-gray-500">May 1, 2023</div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
+                      <button 
+                        className="text-indigo-600 hover:text-indigo-900 focus:outline-none focus:underline"
+                        onClick={() => navigate(`/admin/affiliates/john-doe`)}
+                      >
+                        View
+                      </button>
+                      <button 
+                        className="text-blue-600 hover:text-blue-900 focus:outline-none focus:underline"
+                        onClick={() => handleEditAffiliate('John Doe')}
+                      >
+                        Edit
+                      </button>
+                      <button 
+                        className="text-red-600 hover:text-red-900 focus:outline-none focus:underline"
+                        onClick={() => handleDeactivateAffiliate('John Doe')}
+                      >
+                        Deactivate
+                      </button>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="flex items-center">
+                              <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center">
+                                <span className="text-xs font-medium">JS</span>
+                              </div>
+                              <div className="ml-4">
+                                <div className="text-sm font-medium text-gray-900">Jane Smith</div>
+                                <div className="text-sm text-gray-500">jane@example.com</div>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="text-sm text-gray-900">28</div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="text-sm text-gray-900">12%</div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="text-sm text-gray-900">$2,150.30</div>
+                          </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                        Active
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-gray-500">May 1, 2023</div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
+                      <button 
+                        className="text-indigo-600 hover:text-indigo-900 focus:outline-none focus:underline"
+                        onClick={() => navigate(`/admin/affiliates/jane-smith`)}
+                      >
+                        View
+                      </button>
+                      <button 
+                        className="text-blue-600 hover:text-blue-900 focus:outline-none focus:underline"
+                        onClick={() => handleEditAffiliate('Jane Smith')}
+                      >
+                        Edit
+                      </button>
+                      <button 
+                        className="text-red-600 hover:text-red-900 focus:outline-none focus:underline"
+                        onClick={() => handleDeactivateAffiliate('Jane Smith')}
+                      >
+                        Deactivate
+                      </button>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+            </div>
+          </div>
+        );
+      case 'homepage':
+        return (
+          <div className="px-4 py-5 sm:px-6">
+            <HomepageBannerContentManager 
+              initialBannerData={homepageContent.banner}
+              onUpdateBanner={(updatedBanner) => handleHomepageContentUpdate('banner', updatedBanner)}
+                  />
+                </div>
+        );
+      case 'popups':
+        return (
+          <div className="space-y-6">
+            <div className="flex justify-between items-center">
+              <h3 className="text-xl font-bold text-gray-900">Popup Management</h3>
+              <button 
+                onClick={() => {
+                  setEditingPopup(null);
+                  setShowPopupForm(true);
+                }}
+                className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 flex items-center"
+              >
+                <PlusOutlined className="mr-2" /> Create New Popup
+                </button>
+            </div>
+            
+            <p className="text-sm text-gray-500">
+              Manage popups that appear on your website. Create informational messages, announcements, or onboarding guides.
+            </p>
+            
+            <div className="bg-white shadow rounded-lg overflow-hidden">
+              <div className="overflow-x-auto">
+                  <table className="min-w-full divide-y divide-gray-200">
+                    <thead className="bg-gray-50">
+                      <tr>
+                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Title</th>
+                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
+                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Pages</th>
+                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Device Targeting</th>
+                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200">
+                    {popups.map(popup => (
+                      <tr key={popup.id}>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm font-medium text-gray-900">{popup.title}</div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                            popup.type === 'tutorial' ? 'bg-purple-100 text-purple-800' : 
+                            popup.type === 'info' ? 'bg-blue-100 text-blue-800' : 
+                            popup.type === 'warning' ? 'bg-yellow-100 text-yellow-800' : 
+                            'bg-green-100 text-green-800'
+                          }`}>
+                            {popup.type?.charAt(0).toUpperCase() + popup.type?.slice(1) || 'Info'}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm text-gray-500">
+                            {popup.pages.map(page => (
+                              <span key={page} className="inline-block bg-gray-100 rounded-full px-2 py-1 text-xs font-semibold text-gray-700 mr-1">
+                                {page}
+                          </span>
+                            ))}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="flex space-x-1">
+                            {popup.deviceTargeting?.desktop && (
+                              <span className="inline-block bg-blue-100 rounded-full px-2 py-1 text-xs font-semibold text-blue-700">
+                                Desktop
+                          </span>
+                            )}
+                            {popup.deviceTargeting?.tablet && (
+                              <span className="inline-block bg-green-100 rounded-full px-2 py-1 text-xs font-semibold text-green-700">
+                                Tablet
+                              </span>
+                            )}
+                            {popup.deviceTargeting?.mobile && (
+                              <span className="inline-block bg-purple-100 rounded-full px-2 py-1 text-xs font-semibold text-purple-700">
+                                Mobile
+                              </span>
+                            )}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                            popup.enabled ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
+                          }`}>
+                            {popup.enabled ? 'Active' : 'Inactive'}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                          <div className="flex space-x-2">
+                            <button
+                              onClick={() => {
+                                setEditingPopup(popup);
+                                setShowPopupForm(true);
+                              }}
+                              className="text-indigo-600 hover:text-indigo-900"
+                              title="Edit Popup"
+                            >
+                              <EditOutlined />
+                            </button>
+                            <button
+                              onClick={() => {
+                                const updatedPopup = {...popup, enabled: !popup.enabled};
+                                setPopups(popups.map(p => p.id === popup.id ? updatedPopup : p));
+                              }}
+                              className={`${popup.enabled ? 'text-yellow-600 hover:text-yellow-900' : 'text-green-600 hover:text-green-900'}`}
+                              title={popup.enabled ? 'Disable' : 'Enable'}
+                            >
+                              {popup.enabled ? <LockOutlined /> : <UnlockOutlined />}
+                            </button>
+                            <button
+                              onClick={() => handlePopupDelete(popup.id)}
+                              className="text-red-600 hover:text-red-900"
+                              title="Delete Popup"
+                            >
+                              <DeleteOutlined />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            
+            {/* Popup Form Modal */}
+            {showPopupForm && (
+              <Modal
+                title={`${editingPopup ? 'Edit' : 'Create'} Popup`}
+                open={showPopupForm}
+                onCancel={() => {
+                  setEditingPopup(null);
+                  setShowPopupForm(false);
+                }}
+                footer={[
+                  <Button 
+                    key="cancel" 
+                    onClick={() => {
+                      setEditingPopup(null);
+                      setShowPopupForm(false);
+                    }}
+                  >
+                    Cancel
+                  </Button>,
+                  <Button
+                    key="submit"
+                    type="primary"
+                    onClick={() => {
+                      if (editingPopup) {
+                        handlePopupUpdate(editingPopup);
+                      } else {
+                        handlePopupAdd({
+                          id: Date.now().toString(),
+                          title: 'New Popup',
+                          content: 'Popup content goes here',
+                          enabled: true,
+                          pages: ['home'],
+                          showOnce: true,
+                          position: 'center',
+                          size: 'medium',
+                          delay: 1,
+                          deviceTargeting: {
+                            desktop: true,
+                            tablet: true,
+                            mobile: true
+                          },
+                          type: 'info'
+                        });
+                      }
+                    }}
+                  >
+                    {editingPopup ? 'Update' : 'Create'}
+                  </Button>
+                ]}
+                width={800}
+              >
+                <PopupForm 
+                  popup={editingPopup}
+                  onSave={editingPopup ? handlePopupUpdate : handlePopupAdd}
+                  onCancel={() => {
+                    setEditingPopup(null);
+                    setShowPopupForm(false);
+                  }}
+                />
+              </Modal>
+            )}
+          </div>
+        );
+      case 'settings':
+        return (
+          <div className="settings-tab">
+            <h2 className="text-2xl font-bold mb-6">Platform Settings</h2>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* System Settings */}
+              <div className="bg-white rounded-lg shadow-md p-5">
+                <h3 className="text-xl font-semibold mb-4">System Settings</h3>
+                <div className="space-y-4">
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <p className="font-medium">Maintenance Mode</p>
+                      <p className="text-sm text-gray-500">Disable user access during updates</p>
+                </div>
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input type="checkbox" className="sr-only peer" onChange={(e) => handleToggleMaintenance(e.target.checked)} />
+                      <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                    </label>
+            </div>
+            
+                  <div className="flex justify-between items-center">
+                  <div>
+                      <p className="font-medium">API Dashboard</p>
+                      <p className="text-sm text-gray-500">API usage and developer tools</p>
+                </div>
+                    <button 
+                      onClick={handleViewApiDashboard}
+                      className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
+                    >
+                      View
+                    </button>
+                    </div>
+                    </div>
+                    </div>
+                  
+              {/* Security Settings */}
+              <div className="bg-white rounded-lg shadow-md p-5">
+                <h3 className="text-xl font-semibold mb-4">Security</h3>
+                <div className="space-y-4">
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <p className="font-medium">Two-Factor Authentication</p>
+                      <p className="text-sm text-gray-500">Required for all administrators</p>
+                    </div>
+                    <button 
+                      onClick={() => handleEditSetting('2FA', 'Admins Only')}
+                      className="px-3 py-1 border border-gray-300 rounded text-gray-700 hover:bg-gray-100 transition"
+                    >
+                      Configure
+                </button>
+                  </div>
+                  
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <p className="font-medium">Password Policy</p>
+                      <p className="text-sm text-gray-500">Minimum 8 characters, 1 special character</p>
+                    </div>
+                    <button 
+                      onClick={() => handleEditSetting('PasswordPolicy', 'Standard')}
+                      className="px-3 py-1 border border-gray-300 rounded text-gray-700 hover:bg-gray-100 transition"
+                    >
+                      Edit
+                    </button>
+                  </div>
+                    </div>
+                  </div>
+                  
+              {/* Notification Settings */}
+              <div className="bg-white rounded-lg shadow-md p-5">
+                <h3 className="text-xl font-semibold mb-4">Notifications</h3>
+                <div className="space-y-4">
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <p className="font-medium">Email Notifications</p>
+                      <p className="text-sm text-gray-500">
+                        {Object.values(notificationSettings.emailNotifications).filter(Boolean).length} types enabled
+                      </p>
+                    </div>
+                    <button 
+                      onClick={() => handleEditSetting('EmailNotifications', 'Configure')}
+                      className="px-3 py-1 border border-gray-300 rounded text-gray-700 hover:bg-gray-100 transition"
+                    >
+                      Configure
+                    </button>
+                    </div>
+                  
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <p className="font-medium">Alert Thresholds</p>
+                      <p className="text-sm text-gray-500">System alerts for critical events</p>
+                    </div>
+                    <button 
+                      onClick={() => handleEditSetting('AlertThresholds', 'Configure')}
+                      className="px-3 py-1 border border-gray-300 rounded text-gray-700 hover:bg-gray-100 transition"
+                    >
+                      Edit
+                      </button>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Billing Settings */}
+              <div className="bg-white rounded-lg shadow-md p-5">
+                <h3 className="text-xl font-semibold mb-4">Billing & Payments</h3>
+                  <div className="space-y-4">
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <p className="font-medium">Payment Gateways</p>
+                      <p className="text-sm text-gray-500">Stripe, PayPal configured</p>
+                    </div>
+                    <button 
+                      onClick={() => handleEditSetting('PaymentGateways', '2 active')}
+                      className="px-3 py-1 border border-gray-300 rounded text-gray-700 hover:bg-gray-100 transition"
+                    >
+                      Manage
+                      </button>
+                    </div>
+                
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <p className="font-medium">Platform Fees</p>
+                      <p className="text-sm text-gray-500">Commission rates and fixed fees</p>
+                      </div>
+                    <button 
+                      onClick={() => handleEditSetting('PlatformFees', '5% + $0.30')}
+                      className="px-3 py-1 border border-gray-300 rounded text-gray-700 hover:bg-gray-100 transition"
+                    >
+                      Edit
+                      </button>
+                    </div>
+                    </div>
+                  </div>
+                </div>
+                
+            {/* Email Notifications Modal */}
+            <Modal
+              title="Email Notification Preferences"
+              open={notificationModalVisible}
+              onCancel={() => setNotificationModalVisible(false)}
+              footer={[
+                <Button key="cancel" onClick={() => setNotificationModalVisible(false)}>
+                  Cancel
+                </Button>,
+                <Button key="save" type="primary" onClick={saveNotificationSettings}>
+                  Save Changes
+                </Button>
+              ]}
+              width={600}
+            >
+              <div className="space-y-4 py-2">
+                <p className="text-gray-500 mb-4">Select which email notifications you would like to receive.</p>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Checkbox 
+                      checked={notificationSettings.emailNotifications.newMerchant}
+                      onChange={(e) => handleEmailNotificationChange('newMerchant', e.target.checked)}
+                    >
+                      <div>
+                        <p className="font-medium">New Merchant Registration</p>
+                        <p className="text-xs text-gray-500">When a new merchant signs up</p>
+                        </div>
+                    </Checkbox>
+                      </div>
+                    
+                  <div>
+                    <Checkbox 
+                      checked={notificationSettings.emailNotifications.newOrder}
+                      onChange={(e) => handleEmailNotificationChange('newOrder', e.target.checked)}
+                    >
+                      <div>
+                        <p className="font-medium">New Orders</p>
+                        <p className="text-xs text-gray-500">When merchants receive orders</p>
+                      </div>
+                    </Checkbox>
+                    </div>
+                    
+                  <div>
+                    <Checkbox 
+                      checked={notificationSettings.emailNotifications.lowInventory}
+                      onChange={(e) => handleEmailNotificationChange('lowInventory', e.target.checked)}
+                    >
+                      <div>
+                        <p className="font-medium">Low Inventory</p>
+                        <p className="text-xs text-gray-500">When product inventory is low</p>
+                      </div>
+                    </Checkbox>
+                        </div>
+                  
+                  <div>
+                    <Checkbox 
+                      checked={notificationSettings.emailNotifications.systemAlerts}
+                      onChange={(e) => handleEmailNotificationChange('systemAlerts', e.target.checked)}
+                    >
+                      <div>
+                        <p className="font-medium">System Alerts</p>
+                        <p className="text-xs text-gray-500">Critical system notifications</p>
+                      </div>
+                    </Checkbox>
+                    </div>
+                    
+                  <div>
+                    <Checkbox 
+                      checked={notificationSettings.emailNotifications.marketingCampaigns}
+                      onChange={(e) => handleEmailNotificationChange('marketingCampaigns', e.target.checked)}
+                    >
+                      <div>
+                        <p className="font-medium">Marketing Campaigns</p>
+                        <p className="text-xs text-gray-500">Updates on marketing initiatives</p>
+                        </div>
+                    </Checkbox>
+                      </div>
+                
+                  <div>
+                    <Checkbox 
+                      checked={notificationSettings.emailNotifications.billingUpdates}
+                      onChange={(e) => handleEmailNotificationChange('billingUpdates', e.target.checked)}
+                    >
+                      <div>
+                        <p className="font-medium">Billing Updates</p>
+                        <p className="text-xs text-gray-500">Changes to merchant billing</p>
+                      </div>
+                    </Checkbox>
+                    </div>
+                  
+                  <div>
+                    <Checkbox 
+                      checked={notificationSettings.emailNotifications.customerSupport}
+                      onChange={(e) => handleEmailNotificationChange('customerSupport', e.target.checked)}
+                    >
+                      <div>
+                        <p className="font-medium">Support Tickets</p>
+                        <p className="text-xs text-gray-500">New and updated support requests</p>
+            </div>
+                    </Checkbox>
+                  </div>
+                </div>
+                
+                <Divider />
+                
+                <div>
+                  <p className="font-medium mb-2">Notification Frequency</p>
+                  <Select 
+                    defaultValue="immediate" 
+                    style={{ width: '100%' }}
+                    options={[
+                      { value: 'immediate', label: 'Send Immediately' },
+                      { value: 'hourly', label: 'Hourly Digest' },
+                      { value: 'daily', label: 'Daily Digest' },
+                      { value: 'weekly', label: 'Weekly Summary' }
+                    ]}
+                  />
+                  </div>
+                  </div>
+            </Modal>
+            
+            {/* Alert Thresholds Drawer */}
+            <Drawer
+              title="Alert Threshold Settings"
+              placement="right"
+              open={thresholdDrawerVisible}
+              onClose={() => setThresholdDrawerVisible(false)}
+              extra={
+                <Button type="primary" onClick={saveThresholdSettings}>
+                  Save
+                </Button>
+              }
+              width={400}
+            >
+              <div className="space-y-6">
+                <div>
+                  <p className="font-medium mb-2">Low Inventory Threshold (%)</p>
+                  <p className="text-xs text-gray-500 mb-2">Alert when product inventory falls below this percentage</p>
+                  <Input
+                    type="number"
+                    min={1}
+                    max={50}
+                    value={notificationSettings.alertThresholds.inventoryLevel}
+                    onChange={(e) => handleThresholdChange('inventoryLevel', parseInt(e.target.value))}
+                    suffix="%"
+                  />
+                </div>
+            
+                <div>
+                  <p className="font-medium mb-2">Revenue Change Alert (%)</p>
+                  <p className="text-xs text-gray-500 mb-2">Alert when revenue changes by this percentage</p>
+                  <Input
+                    type="number"
+                    min={1}
+                    max={50}
+                    value={notificationSettings.alertThresholds.revenueChange}
+                    onChange={(e) => handleThresholdChange('revenueChange', parseInt(e.target.value))}
+                    suffix="%"
+                  />
+              </div>
+                
+                <div>
+                  <p className="font-medium mb-2">New User Signups Milestone</p>
+                  <p className="text-xs text-gray-500 mb-2">Alert when this many new users sign up in a day</p>
+                  <Input
+                    type="number"
+                    min={10}
+                    max={1000}
+                    value={notificationSettings.alertThresholds.userSignups}
+                    onChange={(e) => handleThresholdChange('userSignups', parseInt(e.target.value))}
+                    suffix="users"
+                  />
+            </div>
+            
+                <div>
+                  <p className="font-medium mb-2">System Error Rate (%)</p>
+                  <p className="text-xs text-gray-500 mb-2">Alert when error rate exceeds this percentage</p>
+                  <Input
+                    type="number"
+                    min={1}
+                    max={20}
+                    value={notificationSettings.alertThresholds.errorRate}
+                    onChange={(e) => handleThresholdChange('errorRate', parseInt(e.target.value))}
+                    suffix="%"
+                  />
+                </div>
+              </div>
+            </Drawer>
+            </div>
+        );
+      case 'categories':
+        // Function to get child categories for a parent
+        const getChildCategories = (parentId) => {
+          return categories.filter(cat => cat.parentCategoryId === parentId);
+        };
+        
+        // Function to get root categories (no parent)
+        const getRootCategories = () => {
+          return categories.filter(cat => !cat.parentCategoryId);
+        };
+        
+        // Render categories hierarchically
+        const renderCategoryRow = (category, level = 0) => {
+          const children = getChildCategories(category.id);
+          
+          return (
+            <React.Fragment key={category.id}>
+              <tr className={level > 0 ? 'bg-gray-50' : ''}>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                  <div className={`text-sm font-medium text-gray-900 ${level > 0 ? 'ml-' + (level * 4) : ''}`}>
+                    {level > 0 && <span className="text-gray-400 mr-2">└─</span>}
+                    {category.name}
+                  </div>
+                  <div className="text-sm text-gray-500">{category.id}</div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                  <div className="h-16 w-16 rounded-md overflow-hidden">
+                    <img 
+                      src={category.image} 
+                      alt={category.name}
+                      className="h-full w-full object-cover"
+                      onError={(e) => {
+                        e.target.onerror = null;
+                        e.target.src = 'https://via.placeholder.com/150?text=No+Image';
+                      }}
+                    />
+                  </div>
+                          </td>
+                <td className="px-6 py-4">
+                  <div className="text-sm text-gray-900 max-w-xs truncate">
+                    {category.htmlDescription ? 
+                      <span className="inline-flex items-center">
+                        <span className="mr-1">{category.description}</span>
+                        <span className="text-blue-500 text-xs">[HTML]</span>
+                      </span> : 
+                      category.description
+                    }
+                  </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                  <div className="text-sm text-gray-500">
+                    <div>Desktop: {category.displaySettings?.desktop || 4}</div>
+                    <div>Tablet: {category.displaySettings?.tablet || 3}</div>
+                    <div>Mobile: {category.displaySettings?.mobile || 2}</div>
+                  </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                  <div className="text-sm text-gray-500">
+                    {category.articles?.length || 0} articles
+                  </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                  <button 
+                    onClick={() => setViewingArticles(category)}
+                    className="text-blue-600 hover:text-blue-900 mr-4"
+                  >
+                    Articles
+                  </button>
+                  <button 
+                    onClick={() => setEditingCategory(category)}
+                    className="text-indigo-600 hover:text-indigo-900 mr-4"
+                  >
+                    Edit
+                  </button>
+                  <button 
+                    onClick={() => handleCategoryDelete(category.id)}
+                    className="text-red-600 hover:text-red-900"
+                  >
+                    Delete
+                  </button>
+                          </td>
+                        </tr>
+              {children.map(child => renderCategoryRow(child, level + 1))}
+            </React.Fragment>
+          );
+        };
+        
+        if (viewingArticles) {
+          return (
+            <div className="w-full">
+              <div className="mb-6">
+                <button 
+                  onClick={() => setViewingArticles(null)}
+                  className="flex items-center text-gray-500 hover:text-gray-700"
+                >
+                  <span className="mr-1">←</span> Back to Categories
+                </button>
+                  </div>
+              
+              <CategoryArticles 
+                category={viewingArticles} 
+                onUpdateCategory={(updatedCategory) => {
+                  handleCategoryUpdate(updatedCategory);
+                  setViewingArticles(updatedCategory);
+                }}
+              />
+          </div>
+        );
+        }
+        
+        return (
+          <div className="w-full">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-xl font-bold">Categories Management</h2>
+              <button 
+                onClick={() => setIsAddingCategory(true)}
+                className="bg-primary text-white px-4 py-2 rounded-md hover:bg-primary-dark"
+              >
+                Add Category
+                </button>
+              </div>
+            
+            {isAddingCategory && (
+              <div className="bg-white p-6 rounded-lg shadow mb-6">
+                <h3 className="text-lg font-medium mb-4">Add New Category</h3>
+                <CategoryForm 
+                  onSave={handleCategoryAdd} 
+                  onCancel={() => setIsAddingCategory(false)} 
+                  allCategories={categories}
+                />
+            </div>
+            )}
+            
+            {editingCategory && (
+              <div className="bg-white p-6 rounded-lg shadow mb-6">
+                <h3 className="text-lg font-medium mb-4">Edit Category</h3>
+                <CategoryForm 
+                  category={editingCategory}
+                  onSave={handleCategoryUpdate} 
+                  onCancel={() => setEditingCategory(null)} 
+                  allCategories={categories}
+                />
+              </div>
+            )}
+            
+            <div className="bg-white rounded-lg shadow overflow-hidden">
+                    <table className="min-w-full divide-y divide-gray-200">
+                      <thead className="bg-gray-50">
+                        <tr>
+                          <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Name
+                          </th>
+                          <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Image
+                          </th>
+                          <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Description
+                          </th>
+                          <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Display Settings
+                          </th>
+                          <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Articles
+                          </th>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Actions
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody className="bg-white divide-y divide-gray-200">
+                  {getRootCategories().map(category => renderCategoryRow(category))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+        );
+      case 'about':
+        return (
+          <div className="space-y-6">
+            <h3 className="text-xl font-bold text-gray-900">About Page Management</h3>
+            <p className="text-sm text-gray-500">
+              Update the content of your About page. Changes will be reflected immediately on the website.
+            </p>
+            
+            {(isAuthenticated && userRole === 'admin') ? (
+              aboutPageContent ? (
+                <AboutPageEdit 
+                  initialContent={aboutPageContent}
+                  onSave={handleAboutPageSave}
+                />
+              ) : (
+                <div className="py-4 text-center">
+                  <Spin size="large" />
+                  <p className="mt-3">Loading content...</p>
+              </div>
+              )
+            ) : (
+              <div className="py-4 text-center text-red-500">
+                <p>Authentication required. Please log in as an admin to access this feature.</p>
+                <Button 
+                  className="mt-4" 
+                  type="primary" 
+                  onClick={() => {
+                    navigate('/login', { state: { from: location.pathname } });
+                  }}
+                >
+                  Go to Login
+                </Button>
+            </div>
+            )}
+          </div>
+        );
+      case 'contact':
+        return (
+          <div className="space-y-6">
+            <div className="flex justify-between items-center">
+              <h3 className="text-xl font-bold text-gray-900">Contact Page Management</h3>
+              <button 
+                onClick={() => navigateToTab('overview')}
+                className="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 flex items-center"
+              >
+                Exit
+                </button>
+              </div>
+            <p className="text-sm text-gray-500">
+              Update contact information, WhatsApp numbers, and email addresses for different countries.
+            </p>
+            {(isAuthenticated && userRole === 'admin') ? (
+              contactPageContent ? (
+                <ContactPageEdit 
+                  initialContent={contactPageContent}
+                  onSave={handleContactPageUpdate}
+                />
+              ) : (
+                <div className="py-4 text-center">
+                  <Spin size="large" />
+                  <p className="mt-3">Loading contact information...</p>
+            </div>
+              )
+            ) : (
+              <div className="py-4 text-center text-red-500">
+                <p>Authentication required. Please log in as an admin to access this feature.</p>
+                <Button 
+                  className="mt-4" 
+                  type="primary" 
+                  onClick={() => {
+                    navigate('/login', { state: { from: location.pathname } });
+                  }}
+                >
+                  Go to Login
+                </Button>
+                  </div>
+            )}
+          </div>
+        );
+      case 'seo':
+        const filteredPages = seoSettings.pages.filter(page => 
+          page.title.toLowerCase().includes(seoSearchTerm.toLowerCase()) ||
+          page.url.toLowerCase().includes(seoSearchTerm.toLowerCase())
+        );
+        
+        return (
+          <div className="space-y-6">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sm:gap-0">
+              <h3 className="text-2xl font-bold text-gray-900">SEO Service Enhancements</h3>
+              <div className="flex flex-wrap gap-2">
+                <button 
+                  onClick={() => setShowAddLanguageModal(true)}
+                  className="px-3 py-2 sm:px-4 sm:py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 flex items-center text-sm sm:text-base"
+                >
+                  <FaLanguage className="mr-1 sm:mr-2" /> 
+                  <span>Add Language</span>
+                </button>
+                <button 
+                  onClick={() => setShowCreatePageModal(true)}
+                  className="px-3 py-2 sm:px-4 sm:py-2 bg-green-600 text-white rounded-md hover:bg-green-700 flex items-center text-sm sm:text-base"
+                >
+                  <FaPlus className="mr-1 sm:mr-2" /> 
+                  <span>Create Page</span>
+                </button>
+              </div>
+            </div>
+            
+            <div className="bg-white shadow rounded-lg p-4 sm:p-6">
+              <h4 className="text-lg font-semibold mb-4">Language Settings</h4>
+              <p className="text-sm text-gray-500 mb-4">
+                Manage which languages are available for your SEO optimization. Active languages will be available when creating or editing pages.
+              </p>
+              
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+                {seoSettings.languages.map(lang => (
+                  <div key={lang.code} className="border rounded-md p-3 sm:p-4 flex justify-between items-center">
+                    <div className="overflow-hidden">
+                      <span className="font-medium">{lang.name}</span>
+                      <span className="text-gray-500 text-sm ml-2">({lang.code})</span>
+                  </div>
+                    <label className="inline-flex items-center cursor-pointer">
+                      <input 
+                        type="checkbox" 
+                        className="sr-only peer"
+                        checked={lang.active}
+                        onChange={() => handleToggleLanguage(lang.code)}
+                      />
+                      <div className="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+                    </label>
+                </div>
+                ))}
+              </div>
+            </div>
+            
+            <div className="bg-white shadow rounded-lg p-4 sm:p-6">
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-0 mb-4">
+                <h4 className="text-lg font-semibold">Page SEO Management</h4>
+                <div className="relative w-full sm:w-auto">
+                  <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                    <FaSearch className="text-gray-400" />
+                  </div>
+                  <input
+                    type="text"
+                    className="block w-full sm:w-60 p-2 pl-10 text-sm border border-gray-300 rounded-lg"
+                    placeholder="Search pages..."
+                    value={seoSearchTerm}
+                    onChange={(e) => setSeoSearchTerm(e.target.value)}
+                  />
+              </div>
+            </div>
+            
+              <p className="text-sm text-gray-500 mb-6">
+                Manage SEO settings for individual pages. Add keywords and descriptions to improve search engine visibility.
+              </p>
+              
+              <div className="overflow-x-auto -mx-4 sm:mx-0">
+                    <table className="min-w-full divide-y divide-gray-200">
+                      <thead className="bg-gray-50">
+                        <tr>
+                      <th scope="col" className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Page</th>
+                      <th scope="col" className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">URL</th>
+                      <th scope="col" className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden lg:table-cell">Template</th>
+                      <th scope="col" className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">Date Created</th>
+                      <th scope="col" className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody className="bg-white divide-y divide-gray-200">
+                    {filteredPages.map(page => (
+                      <tr key={page.id} className="hover:bg-gray-50">
+                        <td className="px-4 sm:px-6 py-4">
+                          <div className="font-medium text-gray-900 truncate max-w-[150px] sm:max-w-none">
+                            {page.title}
+                          </div>
+                          <div className="text-sm text-gray-500 md:hidden truncate max-w-[150px]">
+                            {page.url}
+                          </div>
+                          </td>
+                        <td className="px-4 sm:px-6 py-4 hidden md:table-cell">
+                          <div className="text-sm text-gray-500 truncate max-w-[200px] lg:max-w-none">{page.url}</div>
+                          </td>
+                        <td className="px-4 sm:px-6 py-4 hidden lg:table-cell">
+                          <div className="text-sm text-gray-500">{page.template}</div>
+                          </td>
+                        <td className="px-4 sm:px-6 py-4 whitespace-nowrap hidden md:table-cell">
+                          <div className="text-sm text-gray-500">{page.createdAt}</div>
+                          </td>
+                        <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-sm">
+                          <div className="flex space-x-2">
+                            <button
+                              onClick={() => setEditingSeoPage(page)}
+                              className="text-indigo-600 hover:text-indigo-900 p-1"
+                              title="Edit SEO Settings"
+                            >
+                              <FaEdit />
+                            </button>
+                            <button
+                              onClick={() => handleDuplicatePage(page.id)}
+                              className="text-blue-600 hover:text-blue-900 p-1"
+                              title="Duplicate Page"
+                            >
+                              <FaCopy />
+                            </button>
+                            <button
+                              onClick={() => handleDeletePage(page.id)}
+                              className="text-red-600 hover:text-red-900 p-1"
+                              title="Delete Page"
+                            >
+                              <FaTrash />
+                            </button>
+                          </div>
+                          </td>
+                        </tr>
+                    ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+            
+            {/* Edit SEO Modal */}
+            {editingSeoPage && (
+              <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+                <div className="bg-white rounded-lg p-4 sm:p-6 w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+                  <h3 className="text-xl font-bold mb-4">Edit SEO for {editingSeoPage.title}</h3>
+                  
+                  <div className="mb-6">
+                    <h4 className="font-medium mb-3">SEO Settings by Language</h4>
+                    
+                    <div className="space-y-4 sm:space-y-6">
+                      {editingSeoPage.languages.map(lang => {
+                        const language = seoSettings.languages.find(l => l.code === lang.code);
+                        return (
+                          <div key={lang.code} className="p-3 sm:p-4 border rounded-md">
+                            <div className="font-medium mb-3">
+                              {language?.name} ({lang.code})
+              </div>
+                            
+                            <div className="mb-4">
+                              <label className="block text-sm font-medium text-gray-700 mb-1">Keywords</label>
+                              <textarea
+                                className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                                placeholder="Enter keywords separated by commas"
+                                rows="2"
+                                value={lang.keywords || ''}
+                                onChange={(e) => handleUpdatePageSeo(editingSeoPage.id, lang.code, 'keywords', e.target.value)}
+                              />
+                              <p className="text-xs text-gray-500 mt-1">Keywords help search engines understand your page content. Separate with commas.</p>
+                            </div>
+                            
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700 mb-1">Meta Description</label>
+                              <textarea
+                                className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                                placeholder="Enter meta description"
+                                rows="3"
+                                value={lang.description || ''}
+                                onChange={(e) => handleUpdatePageSeo(editingSeoPage.id, lang.code, 'description', e.target.value)}
+                              />
+                              <p className="text-xs text-gray-500 mt-1">A good description is 150-160 characters and summarizes the page content.</p>
+            </div>
+          </div>
+        );
+                      })}
+            </div>
+                </div>
+                  
+                  <div className="flex flex-col sm:flex-row justify-end gap-2 sm:space-x-3">
+                    <button
+                      className="px-4 py-2 border border-gray-300 text-gray-700 rounded-md order-2 sm:order-1"
+                      onClick={() => setEditingSeoPage(null)}
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      className="px-4 py-2 bg-indigo-600 text-white rounded-md order-1 sm:order-2"
+                      onClick={() => {
+                        setEditingSeoPage(null);
+                        setMessage({ type: 'success', text: 'SEO settings updated successfully!' });
+                        setTimeout(() => setMessage(null), 3000);
+                      }}
+                    >
+                      Save Changes
+                    </button>
+                </div>
+                </div>
+                </div>
+            )}
+            
+            {/* Add Language Modal */}
+            {showAddLanguageModal && (
+              <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+                <div className="bg-white rounded-lg p-4 sm:p-6 w-full max-w-lg">
+                  <h3 className="text-xl font-bold mb-4">Add New Language</h3>
+                  
+                  <form onSubmit={(e) => {
+                    e.preventDefault();
+                    handleAddLanguage();
+                  }}>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Language Code
+                        </label>
+                  <input
+                    type="text"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                          placeholder="en"
+                          maxLength="2"
+                          required
+                      value={newLanguage.code}
+                          onChange={(e) => setNewLanguage({...newLanguage, code: e.target.value.toLowerCase()})}
+                  />
+                        <p className="text-xs text-gray-500 mt-1">Two-letter ISO code</p>
+                </div>
+                  
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Language Name
+                        </label>
+                    <input
+                      type="text"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                          placeholder="English"
+                          required
+                      value={newLanguage.name}
+                      onChange={(e) => setNewLanguage({...newLanguage, name: e.target.value})}
+                    />
+                      </div>
+          </div>
+                  
+                    <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 sm:space-x-3">
+                    <button
+                        type="button"
+                        className="px-4 py-2 border border-gray-300 text-gray-700 rounded-md mt-2 sm:mt-0"
+                      onClick={() => setShowAddLanguageModal(false)}
+                    >
+                      Cancel
+                    </button>
+                    <button
+                        type="submit"
+                      className="px-4 py-2 bg-indigo-600 text-white rounded-md"
+                    >
+                      Add Language
+                </button>
+              </div>
+                  </form>
+            </div>
+            </div>
+            )}
+            
+            {/* Create Page Modal */}
+            {showCreatePageModal && (
+              <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+                <div className="bg-white rounded-lg p-4 sm:p-6 w-full max-w-2xl">
+                  <h3 className="text-xl font-bold mb-4">Create New Page</h3>
+                  
+                  <form onSubmit={(e) => {
+                    e.preventDefault();
+                    handleCreatePage();
+                  }}>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Page Title
+                        </label>
+                    <input
+                      type="text"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                          placeholder="About Us"
+                          required
+                      value={newPage.title}
+                      onChange={(e) => setNewPage({...newPage, title: e.target.value})}
+                    />
+                  </div>
+                  
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          URL Path
+                        </label>
+                        <div className="flex">
+                          <span className="inline-flex items-center px-3 py-2 text-sm text-gray-500 bg-gray-100 border border-r-0 border-gray-300 rounded-l-md">
+                            /
+                          </span>
+                    <input
+                      type="text"
+                            className="flex-1 px-3 py-2 border border-gray-300 rounded-r-md text-sm"
+                            placeholder="about-us"
+                            required
+                            value={newPage.url.replace(/^\//, '')}
+                            onChange={(e) => setNewPage({...newPage, url: '/' + e.target.value.replace(/^\//, '')})}
+                          />
+                        </div>
+                      </div>
+                </div>
+                  
+                    <div className="mb-4">
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Template
+                      </label>
+                    <select
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                      value={newPage.template}
+                      onChange={(e) => setNewPage({...newPage, template: e.target.value})}
+                    >
+                        <option value="standard">Standard Page</option>
+                        <option value="landing">Landing Page</option>
+                        <option value="product">Product Page</option>
+                        <option value="blog">Blog Page</option>
+                        <option value="contact">Contact Page</option>
+                    </select>
+              </div>
+
+                    <div className="mb-6">
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Languages
+                      </label>
+                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                        {seoSettings.languages.filter(lang => lang.active).map(lang => (
+                          <label key={lang.code} className="flex items-center space-x-2">
+                            <input
+                              type="checkbox"
+                              className="rounded text-indigo-600"
+                              checked={newPage.languages.some(l => l.code === lang.code)}
+                              onChange={(e) => {
+                                if (e.target.checked) {
+                                  setNewPage({
+                                    ...newPage,
+                                    languages: [...newPage.languages, { code: lang.code, keywords: '', description: '' }]
+                                  });
+                                } else {
+                                  setNewPage({
+                                    ...newPage,
+                                    languages: newPage.languages.filter(l => l.code !== lang.code)
+                                  });
+                                }
+                              }}
+                            />
+                            <span>{lang.name}</span>
+                          </label>
+                        ))}
+                      </div>
+                      <p className="text-xs text-gray-500 mt-1">Select which languages this page will be available in.</p>
+                    </div>
+                    
+                    <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 sm:space-x-3">
+            <button
+                        type="button"
+                        className="px-4 py-2 border border-gray-300 text-gray-700 rounded-md mt-2 sm:mt-0"
+                      onClick={() => setShowCreatePageModal(false)}
+                    >
+                      Cancel
+            </button>
+            <button
+                        type="submit"
+                        className="px-4 py-2 bg-green-600 text-white rounded-md"
+                    >
+                      Create Page
+            </button>
+            </div>
+                  </form>
+                </div>
+              </div>
+            )}
+          </div>
+        );
+      case 'chat':
+        const filteredContacts = chatFilter === 'all' 
+          ? chatContacts 
+          : chatContacts.filter(contact => contact.type === chatFilter.slice(0, -1)); // Remove 's' from filter
+        
+        return (
+          <div className="space-y-6">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-3 sm:space-y-0">
+              <h3 className="text-2xl font-bold text-gray-900">Communication Center</h3>
+              <div className="flex flex-wrap gap-2">
+            <button
+                  onClick={() => handleFilterChats('all')}
+                  className={`px-4 py-2 text-sm rounded-md ${chatFilter === 'all' ? 'bg-indigo-600 text-white' : 'bg-gray-200 text-gray-700'}`}
+                >
+                  All
+            </button>
+            <button
+                  onClick={() => handleFilterChats('merchants')}
+                  className={`px-4 py-2 text-sm rounded-md ${chatFilter === 'merchants' ? 'bg-indigo-600 text-white' : 'bg-gray-200 text-gray-700'}`}
+                >
+                  Merchants
+            </button>
+            <button
+                  onClick={() => handleFilterChats('affiliates')}
+                  className={`px-4 py-2 text-sm rounded-md ${chatFilter === 'affiliates' ? 'bg-indigo-600 text-white' : 'bg-gray-200 text-gray-700'}`}
+                >
+                  Affiliates
+            </button>
+              </div>
+            </div>
+            
+            <div className="bg-white shadow rounded-lg overflow-hidden flex flex-col lg:flex-row h-[70vh]">
+              {/* Contact List */}
+              <div className="w-full lg:w-1/3 border-b lg:border-b-0 lg:border-r">
+                <div className="p-4 border-b">
+                  <Input 
+                    placeholder="Search contacts..." 
+                    prefix={<SearchOutlined className="text-gray-400" />} 
+                  />
+                </div>
+                
+                <div className="overflow-y-auto h-[30vh] lg:h-[calc(70vh-60px)]">
+                  {filteredContacts.map(contact => (
+                    <div 
+                      key={contact.id}
+                      className={`p-4 border-b cursor-pointer hover:bg-gray-50 transition ${activeChat === contact.id ? 'bg-gray-100' : ''}`}
+                      onClick={() => handleSelectChat(contact.id)}
+                    >
+                      <div className="flex items-center">
+                        <div className="flex-shrink-0">
+                <div className="relative">
+                            <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-700">
+                              {contact.avatar}
+                            </div>
+                            {contact.online && (
+                              <span className="absolute bottom-0 right-0 h-3 w-3 rounded-full bg-green-500 border-2 border-white"></span>
+                            )}
+                          </div>
+                        </div>
+                        <div className="ml-3 flex-1">
+                          <div className="flex items-center justify-between">
+                            <p className="text-sm font-medium text-gray-900">{contact.name}</p>
+                            <p className="text-xs text-gray-500">{contact.lastMessageTime}</p>
+                          </div>
+                          <div className="flex items-center justify-between mt-1">
+                            <p className="text-xs text-gray-500 truncate">{contact.lastMessage}</p>
+                            {contact.unread > 0 && (
+                              <span className="ml-2 bg-indigo-600 text-white text-xs font-medium rounded-full h-5 w-5 flex items-center justify-center">
+                                {contact.unread}
+                            </span>
+                            )}
+                          </div>
+                          <div className="mt-1">
+                            <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${
+                              contact.type === 'merchant' ? 'bg-blue-100 text-blue-800' : 'bg-purple-100 text-purple-800'
+                            }`}>
+                              {contact.type.charAt(0).toUpperCase() + contact.type.slice(1)}
+                            </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+                  ))}
+          </div>
+                </div>
+              
+              {/* Chat Area */}
+              <div className="w-full lg:w-2/3 flex flex-col">
+                {activeChat ? (
+                  <>
+                    {/* Chat Header */}
+                    <div className="p-4 border-b flex flex-col sm:flex-row items-start sm:items-center justify-between bg-gray-50 space-y-3 sm:space-y-0">
+                      <div className="flex items-center">
+                        <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-700">
+                          {chatContacts.find(c => c.id === activeChat)?.avatar}
+                        </div>
+                        <div className="ml-3">
+                          <p className="text-sm font-medium text-gray-900">
+                            {chatContacts.find(c => c.id === activeChat)?.name}
+                          </p>
+                          <p className="text-xs text-gray-500">
+                            {chatContacts.find(c => c.id === activeChat)?.type.charAt(0).toUpperCase() + 
+                             chatContacts.find(c => c.id === activeChat)?.type.slice(1)}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex">
+                        <Button type="primary" className="mr-2 text-xs" size="small">
+                          View Profile
+                        </Button>
+                        <Button size="small">
+                          <PhoneOutlined />
+                        </Button>
+                      </div>
+                    </div>
+            
+                    {/* Messages */}
+                    <div className="flex-1 p-4 overflow-y-auto bg-gray-50">
+                      {chatMessages[activeChat]?.map(message => (
+                        <div 
+                          key={message.id} 
+                          className={`mb-4 flex ${message.sender === 'admin' ? 'justify-end' : 'justify-start'}`}
+                        >
+                          <div 
+                            className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
+                              message.sender === 'admin' 
+                                ? 'bg-indigo-600 text-white' 
+                                : 'bg-white border text-gray-700'
+                            }`}
+                          >
+                            <p>{message.content}</p>
+                            <p className={`text-xs mt-1 ${message.sender === 'admin' ? 'text-indigo-200' : 'text-gray-500'}`}>
+                              {message.time}
+                            </p>
+                  </div>
+                </div>
+                      ))}
+              </div>
+                    
+                    {/* Quick Responses */}
+                    <div className="p-2 border-t bg-gray-50">
+                      <div className="flex flex-wrap gap-2">
+                        {quickResponses.map(response => (
+                          <Button 
+                            key={response.id} 
+                            size="small"
+                            onClick={() => handleQuickResponse(response.text)}
+                          >
+                            {response.text.length > 20 ? response.text.substring(0, 20) + '...' : response.text}
+                          </Button>
+                        ))}
+                        <Button 
+                          size="small" 
+                          icon={<PlusOutlined />}
+                          onClick={() => {
+                            const text = prompt('Enter new quick response:');
+                            if (text) handleAddQuickResponse(text);
+                          }}
+                        >
+                          Add
+                        </Button>
+            </div>
+          </div>
+                    
+                    {/* Message Input */}
+                    <div className="p-4 border-t">
+                      <div className="flex">
+                        <Input 
+                          placeholder="Type a message..." 
+                          value={messageInput}
+                          onChange={(e) => setMessageInput(e.target.value)}
+                          onPressEnter={handleSendMessage}
+                          className="flex-1"
+                        />
+                        <Button 
+                          type="primary"
+                          onClick={handleSendMessage}
+                          className="ml-2"
+                        >
+                          Send
+                        </Button>
+                </div>
+                </div>
+                  </>
+                ) : (
+                  <div className="flex flex-col items-center justify-center h-full text-gray-500">
+                    <MessageOutlined style={{ fontSize: '48px' }} />
+                    <p className="mt-4">Select a conversation to start chatting</p>
+                </div>
+                )}
+              </div>
+            </div>
+            
+            {/* Assistance Tools */}
+            <div className="bg-white shadow rounded-lg p-4 sm:p-6">
+              <h4 className="text-lg font-semibold mb-4">Assistance Tools</h4>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+                <Card title="Knowledge Base" className="h-full">
+                  <p className="text-sm text-gray-500 mb-4">
+                    Quick access to help articles and guides to assist merchants and affiliates.
+                  </p>
+                  <Button type="primary" block>
+                    Browse Knowledge Base
+                  </Button>
+                </Card>
+                
+                <Card title="Common Issues" className="h-full">
+                  <p className="text-sm text-gray-500 mb-4">
+                    Templates and solutions for frequently reported issues.
+                  </p>
+                  <div className="space-y-2">
+                    <Button block>API Authentication</Button>
+                    <Button block>Payment Processing</Button>
+                    <Button block>Product Upload</Button>
+                    <Button block>Tracking Links</Button>
+                  </div>
+                </Card>
+                
+                <Card title="Support Tickets" className="h-full">
+                  <p className="text-sm text-gray-500 mb-4">
+                    Create support tickets for issues requiring in-depth assistance.
+                  </p>
+                  <div className="space-y-2">
+                    <Button type="primary" block icon={<PlusOutlined />}>
+                      Create New Ticket
+                    </Button>
+                    <Button block>View Open Tickets (8)</Button>
+                </div>
+                </Card>
+              </div>
+            </div>
+          </div>
+        );
+      case 'reviews':
+        const allReviews = [...reviews.customer.map(r => ({...r, type: 'customer'})), ...reviews.merchant.map(r => ({...r, type: 'merchant'}))];
+        allReviews.sort((a, b) => new Date(b.date) - new Date(a.date));
+        
+        // Filter reviews based on activeReviewTab
+        const filteredReviews = activeReviewTab === 'all' 
+          ? allReviews 
+          : allReviews.filter(review => review.type === activeReviewTab);
+        
+        return (
+          <div className="space-y-6">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-3 sm:space-y-0">
+              <h3 className="text-2xl font-bold text-gray-900">Platform Reviews</h3>
+              <div className="flex flex-wrap gap-2">
+            <button
+                  onClick={() => setActiveReviewTab('all')}
+                  className={`px-4 py-2 text-sm rounded-md ${activeReviewTab === 'all' ? 'bg-indigo-600 text-white' : 'bg-gray-200 text-gray-700'}`}
+                >
+                  All Reviews
+                    </button>
+            <button
+                  onClick={() => setActiveReviewTab('customer')}
+                  className={`px-4 py-2 text-sm rounded-md ${activeReviewTab === 'customer' ? 'bg-indigo-600 text-white' : 'bg-gray-200 text-gray-700'}`}
+                >
+                  Try-On Reviews
+                    </button>
+            <button
+                  onClick={() => setActiveReviewTab('merchant')}
+                  className={`px-4 py-2 text-sm rounded-md ${activeReviewTab === 'merchant' ? 'bg-indigo-600 text-white' : 'bg-gray-200 text-gray-700'}`}
+                >
+                  Scanning Reviews
+                    </button>
+                </div>
+            </div>
+            
+            {/* Review Summary */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="bg-white shadow rounded-lg p-6">
+                <h4 className="text-lg font-semibold mb-2">Customer Satisfaction</h4>
+                <div className="flex items-center mb-2">
+                  <div className="text-3xl font-bold text-gray-900 mr-2">
+                    {reviews.customer.length > 0 
+                      ? (reviews.customer.reduce((acc, review) => acc + review.rating, 0) / reviews.customer.length).toFixed(1) 
+                      : 'N/A'}
+                  </div>
+                  <div className="text-yellow-500">
+                    <span className="text-2xl">★</span>
+                  </div>
+                </div>
+                <p className="text-sm text-gray-500">{reviews.customer.length} reviews from customers</p>
+              </div>
+              
+              <div className="bg-white shadow rounded-lg p-6">
+                <h4 className="text-lg font-semibold mb-2">Merchant Satisfaction</h4>
+                <div className="flex items-center mb-2">
+                  <div className="text-3xl font-bold text-gray-900 mr-2">
+                    {reviews.merchant.length > 0 
+                      ? (reviews.merchant.reduce((acc, review) => acc + review.rating, 0) / reviews.merchant.length).toFixed(1) 
+                      : 'N/A'}
+                  </div>
+                  <div className="text-yellow-500">
+                    <span className="text-2xl">★</span>
+                  </div>
+                </div>
+                <p className="text-sm text-gray-500">{reviews.merchant.length} reviews from merchants</p>
+              </div>
+              
+              <div className="bg-white shadow rounded-lg p-6">
+                <h4 className="text-lg font-semibold mb-2">Areas for Improvement</h4>
+                <ul className="text-sm text-gray-600 space-y-2">
+                  {allReviews.filter(r => r.rating <= 3 && r.reason).slice(0, 5).map((review, idx) => (
+                    <li key={idx} className="flex items-start">
+                      <span className="text-red-500 mr-2">•</span>
+                      <span>{review.reason}: {review.feedback ? review.feedback.substring(0, 50) + (review.feedback.length > 50 ? '...' : '') : 'No details provided'}</span>
+                    </li>
+                  ))}
+                  {allReviews.filter(r => r.rating <= 3 && r.reason).length === 0 && (
+                    <li>No low ratings with reasons provided yet.</li>
+                  )}
+                </ul>
+              </div>
+            </div>
+            
+            {/* Review List */}
+            <div className="bg-white shadow rounded-lg overflow-hidden">
+              <div className="px-6 py-4 border-b border-gray-200">
+                <h4 className="text-lg font-semibold">Recent Reviews</h4>
+              </div>
+              
+              {filteredReviews.length > 0 ? (
+                <div className="divide-y divide-gray-200">
+                  {filteredReviews.map((review, idx) => (
+                    <div key={idx} className="p-6">
+                      <div className="flex justify-between items-start mb-2">
+                        <div>
+                          <div className="flex items-center">
+                            <div className="text-yellow-500 flex">
+                              {[...Array(5)].map((_, i) => (
+                                <span key={i} className={`${i < review.rating ? 'text-yellow-500' : 'text-gray-300'}`}>★</span>
+                              ))}
+                            </div>
+                            <span className="ml-2 text-sm text-gray-600">
+                              {new Date(review.date).toLocaleDateString()}
+                    </span>
+                </div>
+                          <h5 className="font-medium text-gray-900 mt-1">
+                            {review.type === 'customer' ? 'Try-On Experience' : 'Product Scanning'} Review
+                          </h5>
+                        </div>
+                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                          review.type === 'customer' ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800'
+                        }`}>
+                          {review.type === 'customer' ? 'Customer' : 'Merchant'}
+                    </span>
+                </div>
+                      
+                      {review.reason && (
+                        <div className="mb-2">
+                          <span className="text-sm font-medium text-gray-700">Reason for low rating: </span>
+                          <span className="text-sm text-gray-600">{review.reason}</span>
+                        </div>
+                      )}
+                      
+                      {review.feedback && (
+                        <div className="bg-gray-50 p-3 rounded-md text-sm text-gray-700">
+                          "{review.feedback}"
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="p-6 text-center text-gray-500">
+                  No reviews available yet. Reviews will appear here when customers and merchants provide feedback.
+                </div>
+              )}
+            </div>
+          </div>
+        );
+      case 'pages':
+        return <PageManagerTab />;
+      case 'analytics':
+        return (
+          <DashboardLayout>
+            <div className="bg-white rounded-lg shadow-sm mb-6">
+              <div className="border-b px-4 py-3 flex space-x-4">
+            <button
+                  onClick={() => setActiveTab('pages')}
+                  className={`text-sm md:text-base border-b-2 pb-1 ${
+                    activeTab === 'pages'
+                      ? 'border-blue-500 text-blue-600 font-medium'
+                      : 'border-transparent text-gray-500 hover:text-gray-700'
+                  }`}
+                >
+                  Pages
+            </button>
+            <button
+                  onClick={() => setActiveTab('analytics')}
+                  className={`text-sm md:text-base border-b-2 pb-1 ${
+                    activeTab === 'analytics'
+                      ? 'border-blue-500 text-blue-600 font-medium'
+                      : 'border-transparent text-gray-500 hover:text-gray-700'
+                  }`}
+                >
+                  Analytics
+                </button>
+                <button
+                  onClick={() => setActiveTab('settings')}
+                  className={`text-sm md:text-base border-b-2 pb-1 ${
+                    activeTab === 'settings'
+                      ? 'border-blue-500 text-blue-600 font-medium'
+                      : 'border-transparent text-gray-500 hover:text-gray-700'
+                  }`}
+                >
+                  Settings
+                </button>
+              </div>
+
+              {activeTab === 'analytics' && (
+                <div className="p-3 md:p-4">
+                  <div className="flex flex-wrap space-x-2 mb-3 md:mb-4 overflow-x-auto -mx-1 px-1 pb-1">
+                    <button
+                      onClick={() => setAnalyticsTab('overview')}
+                      className={`text-xs md:text-sm px-2 md:px-3 py-1 rounded-md whitespace-nowrap ${
+                        analyticsTab === 'overview'
+                          ? 'bg-blue-50 text-blue-600'
+                          : 'text-gray-600 hover:bg-gray-100'
+                      }`}
+                    >
+                      Overview
+            </button>
+            <button
+                  onClick={() => setAnalyticsTab('affiliates')}
+                      className={`text-xs md:text-sm px-2 md:px-3 py-1 rounded-md whitespace-nowrap ${
+                        analyticsTab === 'affiliates'
+                          ? 'bg-blue-50 text-blue-600'
+                          : 'text-gray-600 hover:bg-gray-100'
+                      }`}
+                    >
+                      Affiliates
+            </button>
+            <button
+                  onClick={() => setAnalyticsTab('conversions')}
+                      className={`text-xs md:text-sm px-2 md:px-3 py-1 rounded-md whitespace-nowrap ${
+                        analyticsTab === 'conversions'
+                          ? 'bg-blue-50 text-blue-600'
+                          : 'text-gray-600 hover:bg-gray-100'
+                      }`}
+                >
+                  Conversions
+            </button>
+            <button
+                  onClick={() => setAnalyticsTab('subscriptions')}
+                      className={`text-xs md:text-sm px-2 md:px-3 py-1 rounded-md whitespace-nowrap ${
+                        analyticsTab === 'subscriptions'
+                          ? 'bg-blue-50 text-blue-600'
+                          : 'text-gray-600 hover:bg-gray-100'
+                      }`}
+                >
+                  Subscriptions
+            </button>
+            <button
+                  onClick={() => setAnalyticsTab('geography')}
+                      className={`text-xs md:text-sm px-2 md:px-3 py-1 rounded-md whitespace-nowrap ${
+                        analyticsTab === 'geography'
+                          ? 'bg-blue-50 text-blue-600'
+                          : 'text-gray-600 hover:bg-gray-100'
+                      }`}
+                >
+                  Geography
+            </button>
+            <button
+                  onClick={() => setAnalyticsTab('demographics')}
+                      className={`text-xs md:text-sm px-2 md:px-3 py-1 rounded-md whitespace-nowrap ${
+                        analyticsTab === 'demographics'
+                          ? 'bg-blue-50 text-blue-600'
+                          : 'text-gray-600 hover:bg-gray-100'
+                      }`}
+                >
+                  Demographics
+            </button>
+              </div>
+              
+                  <div className="mt-2 md:mt-4">
+                    <div className="flex items-center justify-between mb-2 md:mb-4">
+                      <h2 className="text-sm md:text-lg font-medium">Analytics Dashboard</h2>
+                      <div className="flex space-x-2">
+                        <select className="text-xs md:text-sm border rounded-md py-1 px-2 md:py-1.5 md:px-3">
+                          <option>Last 7 days</option>
+                          <option>Last 30 days</option>
+                          <option>Last 90 days</option>
+                          <option>This year</option>
+                          <option>All time</option>
+                </select>
+                        <button className="text-xs md:text-sm border rounded-md py-1 px-2 md:py-1.5 md:px-3 text-blue-600 hover:bg-blue-50">
+                          Export
+                </button>
+                      </div>
+              </div>
+              
+              {analyticsTab === 'overview' && (
+                      <div className="space-y-3 md:space-y-4">
+                        <h3 className="text-sm md:text-md font-medium">Quick Overview</h3>
+                        <p className="text-xs md:text-sm text-gray-600 mb-2 md:mb-4">
+                          At-a-glance metrics showing overall performance.
+                        </p>
+                        
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
+                          <div className="bg-blue-50 rounded-lg p-3 md:p-4 flex flex-col">
+                            <div className="flex items-center mb-1 md:mb-2">
+                              <FiUsers className="text-blue-500 mr-1.5 md:mr-2" />
+                              <span className="text-xs md:text-sm text-gray-500">Merchant Sites</span>
+                    </div>
+                            <div className="text-lg md:text-2xl font-bold">{analyticsData.merchantSites}</div>
+                            <div className="mt-1 text-xs md:text-sm text-green-600">+12% from last month</div>
+                    </div>
+                          <div className="bg-green-50 rounded-lg p-3 md:p-4 flex flex-col">
+                            <div className="flex items-center mb-1 md:mb-2">
+                              <FiLink className="text-green-500 mr-1.5 md:mr-2" />
+                              <span className="text-xs md:text-sm text-gray-500">Affiliate Links</span>
+                    </div>
+                            <div className="text-lg md:text-2xl font-bold">{analyticsData.affiliateLinks.length}</div>
+                            <div className="mt-1 text-xs md:text-sm text-green-600">+8% from last month</div>
+                          </div>
+                          <div className="bg-yellow-50 rounded-lg p-3 md:p-4 flex flex-col">
+                            <div className="flex items-center mb-1 md:mb-2">
+                              <FiMousePointer className="text-yellow-500 mr-1.5 md:mr-2" />
+                              <span className="text-xs md:text-sm text-gray-500">Total Clicks</span>
+                            </div>
+                            <div className="text-lg md:text-2xl font-bold">{analyticsData.totalClicks}</div>
+                            <div className="mt-1 text-xs md:text-sm text-green-600">+15% from last month</div>
+                          </div>
+                          <div className="bg-purple-50 rounded-lg p-3 md:p-4 flex flex-col">
+                            <div className="flex items-center mb-1 md:mb-2">
+                              <FiPercent className="text-purple-500 mr-1.5 md:mr-2" />
+                              <span className="text-xs md:text-sm text-gray-500">Conversion Rate</span>
+                            </div>
+                            <div className="text-lg md:text-2xl font-bold">{analyticsData.conversionRate}%</div>
+                            <div className="mt-1 text-xs md:text-sm text-green-600">+2.5% from last month</div>
+                    </div>
+                  </div>
+                  
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 md:gap-4 mt-2 md:mt-4">
+                          <div className="bg-gray-50 p-3 md:p-4 rounded-lg">
+                            <h4 className="text-xs md:text-sm font-medium mb-2 md:mb-3">Top Performing Merchants</h4>
+                            <div className="overflow-x-auto -mx-1.5 px-1.5">
+                        <table className="min-w-full">
+                          <thead>
+                            <tr className="border-b">
+                                    <th className="text-left p-1.5 md:p-2 text-xs">Merchant</th>
+                                    <th className="text-left p-1.5 md:p-2 text-xs">Products</th>
+                                    <th className="text-left p-1.5 md:p-2 text-xs">Conversions</th>
+                                    <th className="text-left p-1.5 md:p-2 text-xs">Revenue</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                                  {[
+                                    { id: 1, name: 'Fashion Store', products: 287, conversions: '5.2%', revenue: '$12,450' },
+                                    { id: 2, name: 'Shoe Heaven', products: 154, conversions: '4.8%', revenue: '$8,670' },
+                                    { id: 3, name: 'Accessory World', products: 112, conversions: '4.3%', revenue: '$5,430' },
+                                    { id: 4, name: 'Luxury Boutique', products: 87, conversions: '3.9%', revenue: '$4,870' }
+                                  ].map((merchant) => (
+                                    <tr key={merchant.id} className="border-b text-xs md:text-sm">
+                                      <td className="p-1.5 md:p-2">{merchant.name}</td>
+                                      <td className="p-1.5 md:p-2">{merchant.products}</td>
+                                      <td className="p-1.5 md:p-2">{merchant.conversions}</td>
+                                      <td className="p-1.5 md:p-2">{merchant.revenue}</td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                          
+                          <div className="bg-gray-50 p-3 md:p-4 rounded-lg">
+                            <h4 className="text-xs md:text-sm font-medium mb-2 md:mb-3">Recent Activities</h4>
+                            <div className="space-y-2 md:space-y-3">
+                              {[
+                                { id: 1, type: 'New Merchant', desc: 'Vintage Apparel joined the platform', time: '2 hours ago' },
+                                { id: 2, type: 'API Integration', desc: 'Luxury Boutique installed the API', time: '5 hours ago' },
+                                { id: 3, type: 'New Affiliate', desc: 'StyleBlogger joined as an affiliate', time: '1 day ago' },
+                                { id: 4, type: 'Conversion', desc: 'Fashion Store had 15 new conversions', time: '1 day ago' }
+                              ].map((activity) => (
+                                <div key={activity.id} className="flex items-start py-1 border-b border-gray-100">
+                                  <div className="w-2 h-2 rounded-full bg-blue-500 mt-1.5 mr-2"></div>
+                                  <div className="flex-1">
+                                    <div className="text-xs md:text-sm font-medium">{activity.type}</div>
+                                    <div className="text-xs text-gray-500">{activity.desc}</div>
+                                  </div>
+                                  <div className="text-xs text-gray-400">{activity.time}</div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                    
+                    {analyticsTab === 'affiliates' && (
+                      <div className="space-y-3 md:space-y-4">
+                        <h3 className="text-sm md:text-md font-medium">Affiliate Performance</h3>
+                        <p className="text-xs md:text-sm text-gray-600 mb-2 md:mb-4">
+                          Metrics and insights related to affiliate performance.
+                        </p>
+                        
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
+                          <div className="bg-blue-50 rounded-lg p-3 md:p-4 flex flex-col">
+                            <div className="flex items-center mb-1 md:mb-2">
+                              <FiUsers className="text-blue-500 mr-1.5 md:mr-2" />
+                              <span className="text-xs md:text-sm text-gray-500">Total Affiliates</span>
+                            </div>
+                            <div className="text-lg md:text-2xl font-bold">{analyticsData.totalAffiliates}</div>
+                            <div className="mt-1 text-xs md:text-sm text-green-600">+10% from last month</div>
+                          </div>
+                          <div className="bg-green-50 rounded-lg p-3 md:p-4 flex flex-col">
+                            <div className="flex items-center mb-1 md:mb-2">
+                              <FiLink className="text-green-500 mr-1.5 md:mr-2" />
+                              <span className="text-xs md:text-sm text-gray-500">Active Affiliates</span>
+                            </div>
+                            <div className="text-lg md:text-2xl font-bold">{analyticsData.activeAffiliates}</div>
+                            <div className="mt-1 text-xs md:text-sm text-green-600">+8% from last month</div>
+                          </div>
+                          <div className="bg-yellow-50 rounded-lg p-3 md:p-4 flex flex-col">
+                            <div className="flex items-center mb-1 md:mb-2">
+                              <FiMousePointer className="text-yellow-500 mr-1.5 md:mr-2" />
+                              <span className="text-xs md:text-sm text-gray-500">Total Clicks</span>
+                            </div>
+                            <div className="text-lg md:text-2xl font-bold">{analyticsData.totalClicks}</div>
+                            <div className="mt-1 text-xs md:text-sm text-green-600">+15% from last month</div>
+                          </div>
+                          <div className="bg-purple-50 rounded-lg p-3 md:p-4 flex flex-col">
+                            <div className="flex items-center mb-1 md:mb-2">
+                              <FiPercent className="text-purple-500 mr-1.5 md:mr-2" />
+                              <span className="text-xs md:text-sm text-gray-500">Conversion Rate</span>
+                            </div>
+                            <div className="text-lg md:text-2xl font-bold">{analyticsData.conversionRate}%</div>
+                            <div className="mt-1 text-xs md:text-sm text-green-600">+2.5% from last month</div>
+                          </div>
+                        </div>
+                        
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 md:gap-4 mt-2 md:mt-4">
+                          <div className="bg-gray-50 p-3 md:p-4 rounded-lg">
+                            <h4 className="text-xs md:text-sm font-medium mb-2 md:mb-3">Top Performing Affiliates</h4>
+                            <div className="overflow-x-auto -mx-1.5 px-1.5">
+                        <table className="min-w-full">
+                          <thead>
+                            <tr className="border-b">
+                                    <th className="text-left p-1.5 md:p-2 text-xs">Affiliate</th>
+                                    <th className="text-left p-1.5 md:p-2 text-xs">Clicks</th>
+                                    <th className="text-left p-1.5 md:p-2 text-xs">Conversions</th>
+                                    <th className="text-left p-1.5 md:p-2 text-xs">Revenue</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                                  {[
+                                    { id: 1, name: 'FashionBlogger', clicks: 1234, conversions: 56, revenue: '$12,450' },
+                                    { id: 2, name: 'ShoeReviewer', clicks: 876, conversions: 34, revenue: '$8,670' },
+                                    { id: 3, name: 'AccessoryExplorer', clicks: 567, conversions: 23, revenue: '$5,430' },
+                                    { id: 4, name: 'LuxuryLover', clicks: 345, conversions: 12, revenue: '$4,870' }
+                                  ].map((affiliate) => (
+                                    <tr key={affiliate.id} className="border-b text-xs md:text-sm">
+                                      <td className="p-1.5 md:p-2">{affiliate.name}</td>
+                                      <td className="p-1.5 md:p-2">{affiliate.clicks}</td>
+                                      <td className="p-1.5 md:p-2">{affiliate.conversions}</td>
+                                      <td className="p-1.5 md:p-2">{affiliate.revenue}</td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                          
+                          <div className="bg-gray-50 p-3 md:p-4 rounded-lg">
+                            <h4 className="text-xs md:text-sm font-medium mb-2 md:mb-3">Recent Affiliate Activities</h4>
+                            <div className="space-y-2 md:space-y-3">
+                              {[
+                                { id: 1, type: 'New Affiliate', desc: 'VintageApparel joined as an affiliate', time: '2 hours ago' },
+                                { id: 2, type: 'API Integration', desc: 'LuxuryBoutique installed the API', time: '5 hours ago' },
+                                { id: 3, type: 'New Affiliate', desc: 'StyleBlogger joined as an affiliate', time: '1 day ago' },
+                                { id: 4, type: 'Conversion', desc: 'FashionStore had 15 new conversions', time: '1 day ago' }
+                              ].map((activity) => (
+                                <div key={activity.id} className="flex items-start py-1 border-b border-gray-100">
+                                  <div className="w-2 h-2 rounded-full bg-blue-500 mt-1.5 mr-2"></div>
+                                  <div className="flex-1">
+                                    <div className="text-xs md:text-sm font-medium">{activity.type}</div>
+                                    <div className="text-xs text-gray-500">{activity.desc}</div>
+                                  </div>
+                                  <div className="text-xs text-gray-400">{activity.time}</div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                  </div>
+                </div>
+              )}
+              
+                    {analyticsTab === 'conversions' && (
+                      <div className="space-y-3 md:space-y-4">
+                        <h3 className="text-sm md:text-md font-medium">Conversion Analysis</h3>
+                        <p className="text-xs md:text-sm text-gray-600 mb-2 md:mb-4">
+                          Detailed insights into conversion rates and funnels.
+                        </p>
+                        
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
+                          <div className="bg-blue-50 rounded-lg p-3 md:p-4 flex flex-col">
+                            <div className="flex items-center mb-1 md:mb-2">
+                              <FiUsers className="text-blue-500 mr-1.5 md:mr-2" />
+                              <span className="text-xs md:text-sm text-gray-500">Total Conversions</span>
+                            </div>
+                            <div className="text-lg md:text-2xl font-bold">{analyticsData.totalConversions}</div>
+                            <div className="mt-1 text-xs md:text-sm text-green-600">+12% from last month</div>
+                          </div>
+                          <div className="bg-green-50 rounded-lg p-3 md:p-4 flex flex-col">
+                            <div className="flex items-center mb-1 md:mb-2">
+                              <FiLink className="text-green-500 mr-1.5 md:mr-2" />
+                              <span className="text-xs md:text-sm text-gray-500">Conversion Rate</span>
+                            </div>
+                            <div className="text-lg md:text-2xl font-bold">{analyticsData.conversionRate}%</div>
+                            <div className="mt-1 text-xs md:text-sm text-green-600">+8% from last month</div>
+                          </div>
+                          <div className="bg-yellow-50 rounded-lg p-3 md:p-4 flex flex-col">
+                            <div className="flex items-center mb-1 md:mb-2">
+                              <FiMousePointer className="text-yellow-500 mr-1.5 md:mr-2" />
+                              <span className="text-xs md:text-sm text-gray-500">Average Order Value</span>
+                            </div>
+                            <div className="text-lg md:text-2xl font-bold">${analyticsData.averageOrderValue}</div>
+                            <div className="mt-1 text-xs md:text-sm text-green-600">+15% from last month</div>
+                          </div>
+                          <div className="bg-purple-50 rounded-lg p-3 md:p-4 flex flex-col">
+                            <div className="flex items-center mb-1 md:mb-2">
+                              <FiPercent className="text-purple-500 mr-1.5 md:mr-2" />
+                              <span className="text-xs md:text-sm text-gray-500">Bounce Rate</span>
+                            </div>
+                            <div className="text-lg md:text-2xl font-bold">{analyticsData.bounceRate}%</div>
+                            <div className="mt-1 text-xs md:text-sm text-green-600">+2.5% from last month</div>
+                          </div>
+                        </div>
+                        
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 md:gap-4 mt-2 md:mt-4">
+                          <div className="bg-gray-50 p-3 md:p-4 rounded-lg">
+                            <h4 className="text-xs md:text-sm font-medium mb-2 md:mb-3">Conversion Funnel</h4>
+                            <div className="overflow-x-auto -mx-1.5 px-1.5">
+                    <table className="min-w-full">
+                      <thead>
+                                  <tr className="border-b">
+                                    <th className="text-left p-1.5 md:p-2 text-xs">Stage</th>
+                                    <th className="text-left p-1.5 md:p-2 text-xs">Visitors</th>
+                                    <th className="text-left p-1.5 md:p-2 text-xs">Conversion Rate</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                                  {[
+                                    { id: 1, stage: 'Visit', visitors: 1234, conversionRate: '50%' },
+                                    { id: 2, stage: 'Add to Cart', visitors: 876, conversionRate: '40%' },
+                                    { id: 3, stage: 'Checkout', visitors: 567, conversionRate: '30%' },
+                                    { id: 4, stage: 'Purchase', visitors: 345, conversionRate: '20%' }
+                                  ].map((funnel) => (
+                                    <tr key={funnel.id} className="border-b text-xs md:text-sm">
+                                      <td className="p-1.5 md:p-2">{funnel.stage}</td>
+                                      <td className="p-1.5 md:p-2">{funnel.visitors}</td>
+                                      <td className="p-1.5 md:p-2">{funnel.conversionRate}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                            </div>
+                          </div>
+                          
+                          <div className="bg-gray-50 p-3 md:p-4 rounded-lg">
+                            <h4 className="text-xs md:text-sm font-medium mb-2 md:mb-3">Recent Conversion Activity</h4>
+                            <div className="space-y-2 md:space-y-3">
+                              {[
+                                { id: 1, type: 'New Conversion', desc: 'FashionStore had 15 new conversions', time: '2 hours ago' },
+                                { id: 2, type: 'API Integration', desc: 'LuxuryBoutique installed the API', time: '5 hours ago' },
+                                { id: 3, type: 'New Affiliate', desc: 'StyleBlogger joined as an affiliate', time: '1 day ago' },
+                                { id: 4, type: 'Conversion', desc: 'VintageApparel had 10 new conversions', time: '1 day ago' }
+                              ].map((activity) => (
+                                <div key={activity.id} className="flex items-start py-1 border-b border-gray-100">
+                                  <div className="w-2 h-2 rounded-full bg-blue-500 mt-1.5 mr-2"></div>
+                                  <div className="flex-1">
+                                    <div className="text-xs md:text-sm font-medium">{activity.type}</div>
+                                    <div className="text-xs text-gray-500">{activity.desc}</div>
+                                  </div>
+                                  <div className="text-xs text-gray-400">{activity.time}</div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                  </div>
+                </div>
+              )}
+              
+                    {analyticsTab === 'subscriptions' && (
+                      <div className="space-y-3 md:space-y-4">
+                        <h3 className="text-sm md:text-md font-medium">Subscription Metrics</h3>
+                        <p className="text-xs md:text-sm text-gray-600 mb-2 md:mb-4">
+                          Key insights into subscription plans and performance.
+                        </p>
+                        
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
+                          <div className="bg-blue-50 rounded-lg p-3 md:p-4 flex flex-col">
+                            <div className="flex items-center mb-1 md:mb-2">
+                              <FiUsers className="text-blue-500 mr-1.5 md:mr-2" />
+                              <span className="text-xs md:text-sm text-gray-500">Total Subscribers</span>
+                            </div>
+                            <div className="text-lg md:text-2xl font-bold">{analyticsData.totalSubscribers}</div>
+                            <div className="mt-1 text-xs md:text-sm text-green-600">+10% from last month</div>
+                          </div>
+                          <div className="bg-green-50 rounded-lg p-3 md:p-4 flex flex-col">
+                            <div className="flex items-center mb-1 md:mb-2">
+                              <FiLink className="text-green-500 mr-1.5 md:mr-2" />
+                              <span className="text-xs md:text-sm text-gray-500">Active Subscriptions</span>
+                            </div>
+                            <div className="text-lg md:text-2xl font-bold">{analyticsData.activeSubscriptions}</div>
+                            <div className="mt-1 text-xs md:text-sm text-green-600">+8% from last month</div>
+                          </div>
+                          <div className="bg-yellow-50 rounded-lg p-3 md:p-4 flex flex-col">
+                            <div className="flex items-center mb-1 md:mb-2">
+                              <FiMousePointer className="text-yellow-500 mr-1.5 md:mr-2" />
+                              <span className="text-xs md:text-sm text-gray-500">Churn Rate</span>
+                            </div>
+                            <div className="text-lg md:text-2xl font-bold">{analyticsData.churnRate}%</div>
+                            <div className="mt-1 text-xs md:text-sm text-green-600">+15% from last month</div>
+                          </div>
+                          <div className="bg-purple-50 rounded-lg p-3 md:p-4 flex flex-col">
+                            <div className="flex items-center mb-1 md:mb-2">
+                              <FiPercent className="text-purple-500 mr-1.5 md:mr-2" />
+                              <span className="text-xs md:text-sm text-gray-500">Revenue per Subscriber</span>
+                            </div>
+                            <div className="text-lg md:text-2xl font-bold">${analyticsData.revenuePerSubscriber}</div>
+                            <div className="mt-1 text-xs md:text-sm text-green-600">+2.5% from last month</div>
+                          </div>
+                        </div>
+                        
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 md:gap-4 mt-2 md:mt-4">
+                          <div className="bg-gray-50 p-3 md:p-4 rounded-lg">
+                            <h4 className="text-xs md:text-sm font-medium mb-2 md:mb-3">Subscription Plans</h4>
+                            <div className="overflow-x-auto -mx-1.5 px-1.5">
+                    <table className="min-w-full">
+                      <thead>
+                                  <tr className="border-b">
+                                    <th className="text-left p-1.5 md:p-2 text-xs">Plan</th>
+                                    <th className="text-left p-1.5 md:p-2 text-xs">Subscribers</th>
+                                    <th className="text-left p-1.5 md:p-2 text-xs">Revenue</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                                  {[
+                                    { id: 1, plan: 'Basic', subscribers: 1234, revenue: '$12,450' },
+                                    { id: 2, plan: 'Premium', subscribers: 876, revenue: '$8,670' },
+                                    { id: 3, plan: 'Enterprise', subscribers: 567, revenue: '$5,430' },
+                                    { id: 4, plan: 'Custom', subscribers: 345, revenue: '$4,870' }
+                                  ].map((plan) => (
+                                    <tr key={plan.id} className="border-b text-xs md:text-sm">
+                                      <td className="p-1.5 md:p-2">{plan.plan}</td>
+                                      <td className="p-1.5 md:p-2">{plan.subscribers}</td>
+                                      <td className="p-1.5 md:p-2">{plan.revenue}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+                          
+                          <div className="bg-gray-50 p-3 md:p-4 rounded-lg">
+                            <h4 className="text-xs md:text-sm font-medium mb-2 md:mb-3">Recent Subscription Activity</h4>
+                            <div className="space-y-2 md:space-y-3">
+                              {[
+                                { id: 1, type: 'New Subscription', desc: 'FashionStore subscribed to Premium plan', time: '2 hours ago' },
+                                { id: 2, type: 'API Integration', desc: 'LuxuryBoutique installed the API', time: '5 hours ago' },
+                                { id: 3, type: 'New Affiliate', desc: 'StyleBlogger joined as an affiliate', time: '1 day ago' },
+                                { id: 4, type: 'Conversion', desc: 'VintageApparel had 10 new conversions', time: '1 day ago' }
+                              ].map((activity) => (
+                                <div key={activity.id} className="flex items-start py-1 border-b border-gray-100">
+                                  <div className="w-2 h-2 rounded-full bg-blue-500 mt-1.5 mr-2"></div>
+                                  <div className="flex-1">
+                                    <div className="text-xs md:text-sm font-medium">{activity.type}</div>
+                                    <div className="text-xs text-gray-500">{activity.desc}</div>
+                    </div>
+                                  <div className="text-xs text-gray-400">{activity.time}</div>
+                    </div>
+                              ))}
+                    </div>
+                  </div>
+                        </div>
+                      </div>
+                    )}
+                    
+                    {analyticsTab === 'geography' && (
+                      <div className="space-y-3 md:space-y-4">
+                        <h3 className="text-sm md:text-md font-medium">Geographical Analysis</h3>
+                        <p className="text-xs md:text-sm text-gray-600 mb-2 md:mb-4">
+                          Insights into user locations and performance.
+                        </p>
+                        
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
+                          <div className="bg-blue-50 rounded-lg p-3 md:p-4 flex flex-col">
+                            <div className="flex items-center mb-1 md:mb-2">
+                              <FiUsers className="text-blue-500 mr-1.5 md:mr-2" />
+                              <span className="text-xs md:text-sm text-gray-500">Total Users</span>
+                          </div>
+                            <div className="text-lg md:text-2xl font-bold">{analyticsData.totalUsers}</div>
+                            <div className="mt-1 text-xs md:text-sm text-green-600">+12% from last month</div>
+                      </div>
+                          <div className="bg-green-50 rounded-lg p-3 md:p-4 flex flex-col">
+                            <div className="flex items-center mb-1 md:mb-2">
+                              <FiLink className="text-green-500 mr-1.5 md:mr-2" />
+                              <span className="text-xs md:text-sm text-gray-500">Active Users</span>
+                    </div>
+                            <div className="text-lg md:text-2xl font-bold">{analyticsData.activeUsers}</div>
+                            <div className="mt-1 text-xs md:text-sm text-green-600">+8% from last month</div>
+                          </div>
+                          <div className="bg-yellow-50 rounded-lg p-3 md:p-4 flex flex-col">
+                            <div className="flex items-center mb-1 md:mb-2">
+                              <FiMousePointer className="text-yellow-500 mr-1.5 md:mr-2" />
+                              <span className="text-xs md:text-sm text-gray-500">Bounce Rate</span>
+                      </div>
+                            <div className="text-lg md:text-2xl font-bold">{analyticsData.bounceRate}%</div>
+                            <div className="mt-1 text-xs md:text-sm text-green-600">+15% from last month</div>
+                    </div>
+                          <div className="bg-purple-50 rounded-lg p-3 md:p-4 flex flex-col">
+                            <div className="flex items-center mb-1 md:mb-2">
+                              <FiPercent className="text-purple-500 mr-1.5 md:mr-2" />
+                              <span className="text-xs md:text-sm text-gray-500">Conversion Rate</span>
+                  </div>
+                            <div className="text-lg md:text-2xl font-bold">{analyticsData.conversionRate}%</div>
+                            <div className="mt-1 text-xs md:text-sm text-green-600">+2.5% from last month</div>
+                </div>
+                        </div>
+                        
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 md:gap-4 mt-2 md:mt-4">
+                          <div className="bg-gray-50 p-3 md:p-4 rounded-lg">
+                            <h4 className="text-xs md:text-sm font-medium mb-2 md:mb-3">Top Countries</h4>
+                            <div className="overflow-x-auto -mx-1.5 px-1.5">
+                    <table className="min-w-full">
+                      <thead>
+                                  <tr className="border-b">
+                                    <th className="text-left p-1.5 md:p-2 text-xs">Country</th>
+                                    <th className="text-left p-1.5 md:p-2 text-xs">Users</th>
+                                    <th className="text-left p-1.5 md:p-2 text-xs">Conversions</th>
+                                    <th className="text-left p-1.5 md:p-2 text-xs">Revenue</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                                  {[
+                                    { id: 1, country: 'United States', users: 1234, conversions: 56, revenue: '$12,450' },
+                                    { id: 2, country: 'Canada', users: 876, conversions: 34, revenue: '$8,670' },
+                                    { id: 3, country: 'United Kingdom', users: 567, conversions: 23, revenue: '$5,430' },
+                                    { id: 4, country: 'Germany', users: 345, conversions: 12, revenue: '$4,870' }
+                                  ].map((country) => (
+                                    <tr key={country.id} className="border-b text-xs md:text-sm">
+                                      <td className="p-1.5 md:p-2">{country.country}</td>
+                                      <td className="p-1.5 md:p-2">{country.users}</td>
+                                      <td className="p-1.5 md:p-2">{country.conversions}</td>
+                                      <td className="p-1.5 md:p-2">{country.revenue}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                            </div>
+                          </div>
+                          
+                          <div className="bg-gray-50 p-3 md:p-4 rounded-lg">
+                            <h4 className="text-xs md:text-sm font-medium mb-2 md:mb-3">Recent Geographical Activity</h4>
+                            <div className="space-y-2 md:space-y-3">
+                              {[
+                                { id: 1, type: 'New User', desc: 'User from Germany', time: '2 hours ago' },
+                                { id: 2, type: 'API Integration', desc: 'LuxuryBoutique installed the API', time: '5 hours ago' },
+                                { id: 3, type: 'New Affiliate', desc: 'StyleBlogger joined as an affiliate', time: '1 day ago' },
+                                { id: 4, type: 'Conversion', desc: 'FashionStore had 15 new conversions', time: '1 day ago' }
+                              ].map((activity) => (
+                                <div key={activity.id} className="flex items-start py-1 border-b border-gray-100">
+                                  <div className="w-2 h-2 rounded-full bg-blue-500 mt-1.5 mr-2"></div>
+                                  <div className="flex-1">
+                                    <div className="text-xs md:text-sm font-medium">{activity.type}</div>
+                                    <div className="text-xs text-gray-500">{activity.desc}</div>
+                                  </div>
+                                  <div className="text-xs text-gray-400">{activity.time}</div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                  </div>
+                </div>
+              )}
+              
+                    {analyticsTab === 'demographics' && (
+                      <div className="space-y-3 md:space-y-4">
+                        <h3 className="text-sm md:text-md font-medium">Demographic Insights</h3>
+                        <p className="text-xs md:text-sm text-gray-600 mb-2 md:mb-4">
+                          Analysis of user demographics and behavior.
+                        </p>
+                        
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
+                          <div className="bg-blue-50 rounded-lg p-3 md:p-4 flex flex-col">
+                            <div className="flex items-center mb-1 md:mb-2">
+                              <FiUsers className="text-blue-500 mr-1.5 md:mr-2" />
+                              <span className="text-xs md:text-sm text-gray-500">Total Users</span>
+                            </div>
+                            <div className="text-lg md:text-2xl font-bold">{analyticsData.totalUsers}</div>
+                            <div className="mt-1 text-xs md:text-sm text-green-600">+12% from last month</div>
+                          </div>
+                          <div className="bg-green-50 rounded-lg p-3 md:p-4 flex flex-col">
+                            <div className="flex items-center mb-1 md:mb-2">
+                              <FiLink className="text-green-500 mr-1.5 md:mr-2" />
+                              <span className="text-xs md:text-sm text-gray-500">Active Users</span>
+                            </div>
+                            <div className="text-lg md:text-2xl font-bold">{analyticsData.activeUsers}</div>
+                            <div className="mt-1 text-xs md:text-sm text-green-600">+8% from last month</div>
+                          </div>
+                          <div className="bg-yellow-50 rounded-lg p-3 md:p-4 flex flex-col">
+                            <div className="flex items-center mb-1 md:mb-2">
+                              <FiMousePointer className="text-yellow-500 mr-1.5 md:mr-2" />
+                              <span className="text-xs md:text-sm text-gray-500">Bounce Rate</span>
+                            </div>
+                            <div className="text-lg md:text-2xl font-bold">{analyticsData.bounceRate}%</div>
+                            <div className="mt-1 text-xs md:text-sm text-green-600">+15% from last month</div>
+                          </div>
+                          <div className="bg-purple-50 rounded-lg p-3 md:p-4 flex flex-col">
+                            <div className="flex items-center mb-1 md:mb-2">
+                              <FiPercent className="text-purple-500 mr-1.5 md:mr-2" />
+                              <span className="text-xs md:text-sm text-gray-500">Conversion Rate</span>
+                            </div>
+                            <div className="text-lg md:text-2xl font-bold">{analyticsData.conversionRate}%</div>
+                            <div className="mt-1 text-xs md:text-sm text-green-600">+2.5% from last month</div>
+                          </div>
+                        </div>
+                        
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 md:gap-4 mt-2 md:mt-4">
+                          <div className="bg-gray-50 p-3 md:p-4 rounded-lg">
+                            <h4 className="text-xs md:text-sm font-medium mb-2 md:mb-3">Age Distribution</h4>
+                            <div className="overflow-x-auto -mx-1.5 px-1.5">
+                        <table className="min-w-full">
+                          <thead>
+                                  <tr className="border-b">
+                                    <th className="text-left p-1.5 md:p-2 text-xs">Age Group</th>
+                                    <th className="text-left p-1.5 md:p-2 text-xs">Users</th>
+                                    <th className="text-left p-1.5 md:p-2 text-xs">Conversions</th>
+                                    <th className="text-left p-1.5 md:p-2 text-xs">Revenue</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                                  {[
+                                    { id: 1, ageGroup: '18-24', users: 1234, conversions: 56, revenue: '$12,450' },
+                                    { id: 2, ageGroup: '25-34', users: 876, conversions: 34, revenue: '$8,670' },
+                                    { id: 3, ageGroup: '35-44', users: 567, conversions: 23, revenue: '$5,430' },
+                                    { id: 4, ageGroup: '45+', users: 345, conversions: 12, revenue: '$4,870' }
+                                  ].map((ageGroup) => (
+                                    <tr key={ageGroup.id} className="border-b text-xs md:text-sm">
+                                      <td className="p-1.5 md:p-2">{ageGroup.ageGroup}</td>
+                                      <td className="p-1.5 md:p-2">{ageGroup.users}</td>
+                                      <td className="p-1.5 md:p-2">{ageGroup.conversions}</td>
+                                      <td className="p-1.5 md:p-2">{ageGroup.revenue}</td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                    
+                          <div className="bg-gray-50 p-3 md:p-4 rounded-lg">
+                            <h4 className="text-xs md:text-sm font-medium mb-2 md:mb-3">Recent Demographic Activity</h4>
+                            <div className="space-y-2 md:space-y-3">
+                              {[
+                                { id: 1, type: 'New User', desc: 'User from Germany', time: '2 hours ago' },
+                                { id: 2, type: 'API Integration', desc: 'LuxuryBoutique installed the API', time: '5 hours ago' },
+                                { id: 3, type: 'New Affiliate', desc: 'StyleBlogger joined as an affiliate', time: '1 day ago' },
+                                { id: 4, type: 'Conversion', desc: 'FashionStore had 15 new conversions', time: '1 day ago' }
+                              ].map((activity) => (
+                                <div key={activity.id} className="flex items-start py-1 border-b border-gray-100">
+                                  <div className="w-2 h-2 rounded-full bg-blue-500 mt-1.5 mr-2"></div>
+                                  <div className="flex-1">
+                                    <div className="text-xs md:text-sm font-medium">{activity.type}</div>
+                                    <div className="text-xs text-gray-500">{activity.desc}</div>
+                      </div>
+                                  <div className="text-xs text-gray-400">{activity.time}</div>
+                    </div>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+              
+              {activeTab === 'pages' && (
+                <div className="p-3 md:p-4">
+                  <div className="flex items-center justify-between mb-3 md:mb-4">
+                    <h2 className="text-sm md:text-lg font-medium">Your Pages</h2>
+                    <button className="text-xs md:text-sm bg-blue-600 text-white py-1 px-2 md:py-1.5 md:px-3 rounded-md hover:bg-blue-700">
+                      Add New Page
+                    </button>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
+                    {[...Array(6)].map((_, idx) => (
+                      <div key={idx} className="border rounded-lg overflow-hidden">
+                        <div className="h-32 bg-gray-100 flex items-center justify-center">
+                          <span className="text-xs md:text-sm text-gray-400">Preview Image</span>
+                        </div>
+                        <div className="p-2 md:p-3">
+                          <h3 className="text-xs md:text-sm font-medium mb-1">Page Title {idx + 1}</h3>
+                          <p className="text-xs text-gray-500 mb-2 md:mb-3">Last updated: 2 days ago</p>
+                          <div className="flex items-center justify-between">
+                            <span className="text-xs bg-green-100 text-green-800 px-1.5 py-0.5 rounded">
+                              Published
+                            </span>
+                            <div className="flex space-x-1 md:space-x-2">
+                              <button className="text-xs text-gray-500 hover:text-gray-700">
+                                Edit
+                              </button>
+                              <button className="text-xs text-gray-500 hover:text-gray-700">
+                                View
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+              )}
+              
+              {activeTab === 'settings' && (
+                <div className="p-3 md:p-4">
+                  <h2 className="text-sm md:text-lg font-medium mb-3 md:mb-4">Account Settings</h2>
+                  <div className="space-y-3 md:space-y-4">
+                    <div className="border-b pb-3 md:pb-4">
+                      <h3 className="text-xs md:text-sm font-medium mb-2">Profile Information</h3>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
+                        <div>
+                          <label className="block text-xs text-gray-500 mb-1">Name</label>
+                          <input
+                            type="text"
+                            className="w-full border rounded-md p-1.5 md:p-2 text-xs md:text-sm"
+                            defaultValue="John Doe"
+                          />
+                          </div>
+                        <div>
+                          <label className="block text-xs text-gray-500 mb-1">Email</label>
+                          <input
+                            type="email"
+                            className="w-full border rounded-md p-1.5 md:p-2 text-xs md:text-sm"
+                            defaultValue="john.doe@example.com"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="border-b pb-3 md:pb-4">
+                      <h3 className="text-xs md:text-sm font-medium mb-2">Change Password</h3>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
+                        <div>
+                          <label className="block text-xs text-gray-500 mb-1">Current Password</label>
+                          <input
+                            type="password"
+                            className="w-full border rounded-md p-1.5 md:p-2 text-xs md:text-sm"
+                          />
+                      </div>
+                        <div>
+                          <label className="block text-xs text-gray-500 mb-1">New Password</label>
+                          <input
+                            type="password"
+                            className="w-full border rounded-md p-1.5 md:p-2 text-xs md:text-sm"
+                          />
+                    </div>
+                  </div>
+                </div>
+                    
+                    <div className="border-b pb-3 md:pb-4">
+                      <h3 className="text-xs md:text-sm font-medium mb-2">Notification Settings</h3>
+                      <div className="space-y-2 md:space-y-3">
+                        <div className="flex items-center">
+                          <input type="checkbox" className="mr-2" defaultChecked />
+                          <label className="text-xs md:text-sm">Email notifications for new conversions</label>
+            </div>
+                        <div className="flex items-center">
+                          <input type="checkbox" className="mr-2" defaultChecked />
+                          <label className="text-xs md:text-sm">Email notifications for new merchant signups</label>
+          </div>
+                        <div className="flex items-center">
+                          <input type="checkbox" className="mr-2" />
+                          <label className="text-xs md:text-sm">Weekly analytics summary</label>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="flex justify-end">
+                      <button className="text-xs md:text-sm bg-blue-600 text-white py-1 px-2 md:py-1.5 md:px-3 rounded-md hover:bg-blue-700">
+                        Save Changes
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          </DashboardLayout>
+        );
+      case 'subscriptions':
+        return (
+          <div className="space-y-6">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
+              <h3 className="text-2xl font-bold text-gray-900">Subscription Management</h3>
+              <div className="flex space-x-2">
+                <button className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition">
+                  Export Data
+                </button>
+                <button className="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50 transition">
+                  Filter
+                </button>
+              </div>
+            </div>
+
+            {/* Subscription Stats Summary */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+              <div className="bg-white rounded-lg shadow p-4">
+                <p className="text-sm text-gray-500">Active Subscriptions</p>
+                <p className="text-2xl font-bold">{subscriptions.filter(s => s.status === 'active').length}</p>
+                <p className="text-xs text-green-600">+12% from last month</p>
+              </div>
+              <div className="bg-white rounded-lg shadow p-4">
+                <p className="text-sm text-gray-500">Monthly Revenue</p>
+                <p className="text-2xl font-bold">$12,480</p>
+                <p className="text-xs text-green-600">+8% from last month</p>
+              </div>
+              <div className="bg-white rounded-lg shadow p-4">
+                <p className="text-sm text-gray-500">Avg. Subscription Value</p>
+                <p className="text-2xl font-bold">$48.32</p>
+                <p className="text-xs text-gray-600">No change</p>
+              </div>
+              <div className="bg-white rounded-lg shadow p-4">
+                <p className="text-sm text-gray-500">Churn Rate</p>
+                <p className="text-2xl font-bold">2.4%</p>
+                <p className="text-xs text-red-600">+0.3% from last month</p>
+              </div>
+            </div>
+
+            {/* Subscription Table */}
+            <div className="bg-white rounded-lg shadow overflow-hidden">
+              <div className="p-4 border-b">
+                <h4 className="font-medium">All Subscriptions</h4>
+              </div>
+              <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Customer
+                      </th>
+                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Plan
+                      </th>
+                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Status
+                      </th>
+                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Start Date
+                      </th>
+                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Next Renewal
+                      </th>
+                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Amount
+                      </th>
+                      <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Actions
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {subscriptions.map((subscription) => (
+                      <tr key={subscription.userId}>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="flex items-center">
+                            <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-700 font-medium text-sm">
+                              {subscription.name.split(' ').map(n => n[0]).join('')}
+                            </div>
+                            <div className="ml-4">
+                              <div className="text-sm font-medium text-gray-900">{subscription.name}</div>
+                              <div className="text-sm text-gray-500">{subscription.email}</div>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm text-gray-900">{subscription.plan}</div>
+                          <div className="text-xs text-gray-500">{subscription.billingCycle}</div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                            subscription.status === 'active' ? 'bg-green-100 text-green-800' : 
+                            subscription.status === 'past_due' ? 'bg-yellow-100 text-yellow-800' : 
+                            subscription.status === 'canceled' ? 'bg-red-100 text-red-800' : 
+                            'bg-gray-100 text-gray-800'
+                          }`}>
+                            {subscription.status.charAt(0).toUpperCase() + subscription.status.slice(1).replace('_', ' ')}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {subscription.startDate}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {subscription.renewalDate}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                          ${subscription.amount}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                          <button
+                            onClick={() => handleViewSubscription(subscription.userId)}
+                            className="text-indigo-600 hover:text-indigo-900 mr-3"
+                          >
+                            View
+                          </button>
+                          <button
+                            onClick={() => handleChangeSubscriptionPlan(subscription.userId, subscription.plan)}
+                            className="text-indigo-600 hover:text-indigo-900 mr-3"
+                          >
+                            Change Plan
+                          </button>
+                          {subscription.status !== 'canceled' && (
+                            <button
+                              onClick={() => handleCancelSubscription(subscription.userId)}
+                              className="text-red-600 hover:text-red-900"
+                            >
+                              Cancel
+                            </button>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              <div className="px-4 py-3 bg-gray-50 border-t border-gray-200 sm:px-6">
+                <div className="flex items-center justify-between">
+                  <div className="text-sm text-gray-700">
+                    Showing <span className="font-medium">1</span> to <span className="font-medium">{subscriptions.length}</span> of <span className="font-medium">{subscriptions.length}</span> subscriptions
+                  </div>
+                  <div className="flex-1 flex justify-end">
+                    <nav className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+                      <button
+                        className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
+                      >
+                        Previous
+                      </button>
+                      <button
+                        className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
+                      >
+                        Next
+                      </button>
+                    </nav>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* View Subscription Modal */}
+            {viewingSubscription && (
+              <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                <div className="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+                  <div className="flex justify-between items-center mb-6">
+                    <h3 className="text-xl font-bold">Subscription Details</h3>
+                    <button 
+                      onClick={() => setViewingSubscription(null)}
+                      className="text-gray-400 hover:text-gray-500"
+                    >
+                      <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4 mb-6">
+                    <div>
+                      <p className="text-sm text-gray-500">Customer</p>
+                      <p className="font-medium">{viewingSubscription.name}</p>
+                      <p className="text-sm text-gray-500">{viewingSubscription.email}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-500">Subscription ID</p>
+                      <p className="font-medium">SUB-{viewingSubscription.userId.substring(0, 8)}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-500">Plan</p>
+                      <p className="font-medium">{viewingSubscription.plan}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-500">Status</p>
+                      <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                        viewingSubscription.status === 'active' ? 'bg-green-100 text-green-800' : 
+                        viewingSubscription.status === 'past_due' ? 'bg-yellow-100 text-yellow-800' : 
+                        viewingSubscription.status === 'canceled' ? 'bg-red-100 text-red-800' : 
+                        'bg-gray-100 text-gray-800'
+                      }`}>
+                        {viewingSubscription.status.charAt(0).toUpperCase() + viewingSubscription.status.slice(1).replace('_', ' ')}
+                      </span>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-500">Start Date</p>
+                      <p className="font-medium">{viewingSubscription.startDate}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-500">Next Renewal</p>
+                      <p className="font-medium">{viewingSubscription.renewalDate}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-500">Billing Cycle</p>
+                      <p className="font-medium">{viewingSubscription.billingCycle}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-500">Amount</p>
+                      <p className="font-medium">${viewingSubscription.amount}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-500">Payment Method</p>
+                      <div className="flex items-center">
+                        <div className="mr-2">
+                          {viewingSubscription.paymentMethod.type === 'card' ? (
+                            <svg className="h-5 w-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                              <path d="M4 4a2 2 0 00-2 2v8a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2H4zm2 2h12v2H6V6zm0 4h12v6H6v-6z" />
+                            </svg>
+                          ) : (
+                            <svg className="h-5 w-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                              <path d="M3 5a2 2 0 012-2h10a2 2 0 012 2v10a2 2 0 01-2 2H5a2 2 0 01-2-2V5zm12 0H5v10h10V5z" />
+                            </svg>
+                          )}
+                        </div>
+                        <span>{viewingSubscription.paymentMethod.type === 'card' ? 
+                          `${viewingSubscription.paymentMethod.brand.toUpperCase()} **** ${viewingSubscription.paymentMethod.last4}` : 
+                          viewingSubscription.paymentMethod.type}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="border-t pt-4">
+                    <h4 className="font-medium mb-2">Recent Invoices</h4>
+                    <table className="min-w-full divide-y divide-gray-200">
+                      <thead className="bg-gray-50">
+                        <tr>
+                          <th scope="col" className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Date
+                          </th>
+                          <th scope="col" className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Amount
+                          </th>
+                          <th scope="col" className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Status
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody className="bg-white divide-y divide-gray-200">
+                        {[
+                          { date: '2023-11-01', amount: viewingSubscription.amount, status: 'paid' },
+                          { date: '2023-10-01', amount: viewingSubscription.amount, status: 'paid' },
+                          { date: '2023-09-01', amount: viewingSubscription.amount, status: 'paid' }
+                        ].map((invoice, i) => (
+                          <tr key={i}>
+                            <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-500">
+                              {invoice.date}
+                            </td>
+                            <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-900">
+                              ${invoice.amount}
+                            </td>
+                            <td className="px-4 py-2 whitespace-nowrap">
+                              <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                                invoice.status === 'paid' ? 'bg-green-100 text-green-800' : 
+                                invoice.status === 'pending' ? 'bg-yellow-100 text-yellow-800' : 
+                                invoice.status === 'failed' ? 'bg-red-100 text-red-800' : 
+                                'bg-gray-100 text-gray-800'
+                              }`}>
+                                {invoice.status.charAt(0).toUpperCase() + invoice.status.slice(1)}
+                              </span>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+
+                  <div className="flex justify-end space-x-3 mt-6">
+                    <button
+                      className="px-4 py-2 border border-gray-300 text-gray-700 rounded-md"
+                      onClick={() => setViewingSubscription(null)}
+                    >
+                      Close
+                    </button>
+                    <button
+                      className="px-4 py-2 bg-indigo-600 text-white rounded-md"
+                      onClick={() => {
+                        handleChangeSubscriptionPlan(viewingSubscription.userId, viewingSubscription.plan);
+                        setViewingSubscription(null);
+                      }}
+                    >
+                      Change Plan
+                    </button>
+                    {viewingSubscription.status !== 'canceled' && (
+                      <button
+                        className="px-4 py-2 bg-red-600 text-white rounded-md"
+                        onClick={() => {
+                          handleCancelSubscription(viewingSubscription.userId);
+                          setViewingSubscription(null);
+                        }}
+                      >
+                        Cancel Subscription
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Change Plan Modal */}
+            {changingSubscriptionPlan && (
+              <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                <div className="bg-white rounded-lg p-6 w-full max-w-md">
+                  <div className="flex justify-between items-center mb-6">
+                    <h3 className="text-xl font-bold">Change Subscription Plan</h3>
+                    <button 
+                      onClick={() => setChangingSubscriptionPlan(null)}
+                      className="text-gray-400 hover:text-gray-500"
+                    >
+                      <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  </div>
+
+                  <div className="mb-6">
+                    <p className="mb-2">Current Plan: <span className="font-medium">{changingSubscriptionPlan.currentPlan}</span></p>
+                    <p className="text-sm text-gray-500 mb-4">Select a new plan for this customer:</p>
+                    
+                    <div className="space-y-3">
+                      {['Basic', 'Professional', 'Enterprise'].map(plan => (
+                        <div key={plan} className="flex items-center">
+                          <input
+                            id={`plan-${plan}`}
+                            name="plan"
+                            type="radio"
+                            checked={changingSubscriptionPlan.newPlan === plan}
+                            onChange={() => setChangingSubscriptionPlan({...changingSubscriptionPlan, newPlan: plan})}
+                            className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300"
+                          />
+                          <label htmlFor={`plan-${plan}`} className="ml-3 block text-sm font-medium text-gray-700">
+                            {plan}
+                            <span className="text-gray-500 ml-2">
+                              {plan === 'Basic' ? '$19.99/month' : 
+                               plan === 'Professional' ? '$49.99/month' : 
+                               '$99.99/month'}
+                            </span>
+                          </label>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="mb-6">
+                    <p className="text-sm text-gray-500 mb-2">When should this change take effect?</p>
+                    <div className="flex items-center">
+                      <input
+                        id="immediately"
+                        name="changeTime"
+                        type="radio"
+                        checked={changingSubscriptionPlan.changeTime === 'immediately'}
+                        onChange={() => setChangingSubscriptionPlan({...changingSubscriptionPlan, changeTime: 'immediately'})}
+                        className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300"
+                      />
+                      <label htmlFor="immediately" className="ml-3 block text-sm font-medium text-gray-700">
+                        Immediately (prorate current billing cycle)
+                      </label>
+                    </div>
+                    <div className="flex items-center mt-2">
+                      <input
+                        id="nextBilling"
+                        name="changeTime"
+                        type="radio"
+                        checked={changingSubscriptionPlan.changeTime === 'nextBilling'}
+                        onChange={() => setChangingSubscriptionPlan({...changingSubscriptionPlan, changeTime: 'nextBilling'})}
+                        className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300"
+                      />
+                      <label htmlFor="nextBilling" className="ml-3 block text-sm font-medium text-gray-700">
+                        At next billing cycle
+                      </label>
+                    </div>
+                  </div>
+
+                  <div className="flex justify-end space-x-3">
+                    <button
+                      className="px-4 py-2 border border-gray-300 text-gray-700 rounded-md"
+                      onClick={() => setChangingSubscriptionPlan(null)}
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      className="px-4 py-2 bg-indigo-600 text-white rounded-md"
+                      onClick={() => {
+                        // Simulate API call to change subscription plan
+                        // Update subscriptions state with the new plan
+                        const updatedSubscriptions = subscriptions.map(sub => {
+                          if (sub.userId === changingSubscriptionPlan.userId) {
+                            return {
+                              ...sub,
+                              plan: changingSubscriptionPlan.newPlan,
+                              amount: changingSubscriptionPlan.newPlan === 'Basic' ? '19.99' : 
+                                      changingSubscriptionPlan.newPlan === 'Professional' ? '49.99' : 
+                                      '99.99'
+                            };
+                          }
+                          return sub;
+                        });
+                        setSubscriptions(updatedSubscriptions);
+                        setChangingSubscriptionPlan(null);
+                        setMessage({ type: 'success', text: 'Subscription plan updated successfully!' });
+                        setTimeout(() => setMessage(null), 3000);
+                      }}
+                      disabled={!changingSubscriptionPlan.newPlan}
+                    >
+                      Change Plan
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Cancel Subscription Modal */}
+            {cancelingSubscription && (
+              <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                <div className="bg-white rounded-lg p-6 w-full max-w-md">
+                  <div className="flex justify-between items-center mb-6">
+                    <h3 className="text-xl font-bold">Cancel Subscription</h3>
+                    <button 
+                      onClick={() => setCancelingSubscription(null)}
+                      className="text-gray-400 hover:text-gray-500"
+                    >
+                      <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  </div>
+
+                  <div className="mb-6">
+                    <p className="text-sm text-gray-500 mb-4">Are you sure you want to cancel the subscription for:</p>
+                    <p className="font-medium">{cancelingSubscription?.name}</p>
+                    <p className="text-sm text-gray-500">{cancelingSubscription?.email}</p>
+                    <p className="text-sm text-gray-500">Plan: {cancelingSubscription?.plan}</p>
+                  </div>
+
+                  <div className="mb-6">
+                    <p className="text-sm text-gray-500 mb-2">When should this cancellation take effect?</p>
+                    <div className="flex items-center">
+                      <input
+                        id="immediately"
+                        name="cancelTime"
+                        type="radio"
+                        checked={cancelTime === 'immediately'}
+                        onChange={() => setCancelTime('immediately')}
+                        className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300"
+                      />
+                      <label htmlFor="immediately" className="ml-3 block text-sm font-medium text-gray-700">
+                        Immediately (refund remaining time)
+                      </label>
+                    </div>
+                    <div className="flex items-center mt-2">
+                      <input
+                        id="endOfBilling"
+                        name="cancelTime"
+                        type="radio"
+                        checked={cancelTime === 'endOfBilling'}
+                        onChange={() => setCancelTime('endOfBilling')}
+                        className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300"
+                      />
+                      <label htmlFor="endOfBilling" className="ml-3 block text-sm font-medium text-gray-700">
+                        At end of billing period
+                      </label>
+                    </div>
+                  </div>
+
+                  <div className="mb-6">
+                    <label htmlFor="cancelReason" className="block text-sm font-medium text-gray-700 mb-1">
+                      Reason for cancellation (optional)
+                    </label>
+                    <select
+                      id="cancelReason"
+                      className="w-full rounded-md border border-gray-300 py-2 px-3"
+                      value={cancelReason}
+                      onChange={(e) => setCancelReason(e.target.value)}
+                    >
+                      <option value="">Select a reason</option>
+                      <option value="tooExpensive">Too expensive</option>
+                      <option value="notUsing">Not using the product</option>
+                      <option value="switching">Switching to another service</option>
+                      <option value="missingFeatures">Missing features</option>
+                      <option value="other">Other</option>
+                    </select>
+                  </div>
+
+                  <div className="flex justify-end space-x-3">
+                    <button
+                      className="px-4 py-2 border border-gray-300 text-gray-700 rounded-md"
+                      onClick={() => setCancelingSubscription(null)}
+                    >
+                      Keep Subscription
+                    </button>
+                    <button
+                      className="px-4 py-2 bg-red-600 text-white rounded-md"
+                      onClick={confirmCancelSubscription}
+                    >
+                      Confirm Cancellation
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        );
+      case 'category-articles':
+        return (
+          <div className="space-y-6">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sm:gap-0">
+              <h3 className="text-lg sm:text-xl font-bold text-gray-900">Category Articles</h3>
+              <div className="flex flex-wrap w-full sm:w-auto gap-2">
+                <Button 
+                  type="primary" 
+                  icon={<SettingOutlined />}
+                  onClick={() => setShowCategoryDisplaySettings(true)}
+                  className="text-xs sm:text-sm w-full sm:w-auto"
+                  size={window.innerWidth < 640 ? "middle" : "default"}
+                >
+                  Display Settings
+                </Button>
+                <Button 
+                  type="primary" 
+                  icon={<PlusOutlined />}
+                  onClick={() => {
+                    setIsAddingArticle(true);
+                    setEditingArticle(null);
+                    setArticleFormData({
+                      title: '',
+                      category: '',
+                      summary: '',
+                      content: '',
+                      image: '',
+                      status: 'draft'
+                    });
+                    setArticleFormVisible(true);
+                  }}
+                  className="text-xs sm:text-sm w-full sm:w-auto"
+                  size={window.innerWidth < 640 ? "middle" : "default"}
+                >
+                  Add New Article
+                </Button>
+              </div>
+            </div>
+            
+            <div className="bg-white rounded-lg shadow category-articles-container">
+              <Tabs defaultActiveKey="all" 
+                    className="overflow-x-auto" 
+                    size={window.innerWidth < 640 ? "small" : "default"}
+                    tabBarGutter={window.innerWidth < 640 ? 12 : 24}>
+                <Tabs.TabPane tab="All Categories" key="all">
+                  <div className="p-2 sm:p-4">
+                    {window.innerWidth < 768 ? (
+                      // Mobile view - card layout
+                      <div className="space-y-2">
+                        {categoryArticles.map(article => (
+                          <div key={article.id} className="article-card">
+                            <div className="article-card-header">
+                              {article.image && (
+                                <img 
+                                  src={article.image} 
+                                  alt={article.title} 
+                                  className="w-16 h-16 object-cover rounded"
+                                />
+                              )}
+                              <div className="article-card-content">
+                                <h4 className="article-card-title line-clamp-1">{article.title}</h4>
+                                <p className="article-card-summary line-clamp-2">{article.summary}</p>
+                                <div className="flex items-center mt-1">
+                                  <span className={`px-2 py-1 rounded-full text-xs ${
+                                    article.status === 'published' 
+                                      ? 'bg-green-100 text-green-800' 
+                                      : 'bg-yellow-100 text-yellow-800'
+                                  }`}>
+                                    {article.status.charAt(0).toUpperCase() + article.status.slice(1)}
+                                  </span>
+                                  <span className="text-xs text-gray-500 ml-2">
+                                    {new Date(article.updatedAt).toLocaleDateString()}
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+                            <div className="article-card-footer">
+                              <div className="text-xs text-gray-500">
+                                {(() => {
+                                  const categoryObj = categories.find(c => c.id === article.category);
+                                  return categoryObj ? categoryObj.name : article.category;
+                                })()}
+                              </div>
+                              <div className="article-card-actions">
+                                <button onClick={() => handleArticleEdit(article.id)}>
+                                  <EditOutlined className="text-blue-500" />
+                                </button>
+                                <button onClick={() => window.open(`/categories?article=${article.id}`, '_blank')}>
+                                  <EyeOutlined className="text-gray-500" />
+                                </button>
+                                <button onClick={() => handleArticleDelete(article.id)}>
+                                  <DeleteOutlined className="text-red-500" />
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      // Desktop view - table layout
+                      <Table
+                        dataSource={categoryArticles}
+                        rowKey="id"
+                        columns={[
+                          {
+                            title: 'Title',
+                            dataIndex: 'title',
+                            key: 'title',
+                            render: (text, record) => (
+                              <div className="flex items-center">
+                                {record.image && (
+                                  <img 
+                                    src={record.image} 
+                                    alt={text} 
+                                    className="w-12 h-12 object-cover rounded mr-3"
+                                  />
+                                )}
+                                <div>
+                                  <div className="font-medium">{text}</div>
+                                  <div className="text-xs text-gray-500">
+                                    {new Date(record.updatedAt).toLocaleDateString()}
+                                  </div>
+                                </div>
+                              </div>
+                            ),
+                          },
+                          {
+                            title: 'Category',
+                            dataIndex: 'category',
+                            key: 'category',
+                            render: category => {
+                              const categoryObj = categories.find(c => c.id === category);
+                              return categoryObj ? categoryObj.name : category;
+                            }
+                          },
+                          {
+                            title: 'Summary',
+                            dataIndex: 'summary',
+                            key: 'summary',
+                            ellipsis: true,
+                          },
+                          {
+                            title: 'Status',
+                            dataIndex: 'status',
+                            key: 'status',
+                            render: status => (
+                              <span className={`px-2 py-1 rounded-full text-xs ${
+                                status === 'published' 
+                                  ? 'bg-green-100 text-green-800' 
+                                  : 'bg-yellow-100 text-yellow-800'
+                              }`}>
+                                {status.charAt(0).toUpperCase() + status.slice(1)}
+                              </span>
+                            ),
+                          },
+                          {
+                            title: 'Actions',
+                            key: 'actions',
+                            render: (_, record) => (
+                              <div className="flex space-x-2">
+                                <Button 
+                                  icon={<EditOutlined />} 
+                                  size="small"
+                                  onClick={() => handleArticleEdit(record.id)}
+                                >
+                                  Edit
+                                </Button>
+                                <Button 
+                                  icon={<EyeOutlined />} 
+                                  size="small"
+                                  onClick={() => window.open(`/categories?article=${record.id}`, '_blank')}
+                                >
+                                  View
+                                </Button>
+                                <Button 
+                                  icon={<DeleteOutlined />} 
+                                  size="small"
+                                  danger
+                                  onClick={() => handleArticleDelete(record.id)}
+                                >
+                                  Delete
+                                </Button>
+                              </div>
+                            ),
+                          },
+                        ]}
+                        pagination={{ pageSize: 10 }}
+                      />
+                    )}
+                  </div>
+                </Tabs.TabPane>
+                {categories.filter(c => c.id !== 'all').map(category => (
+                  <Tabs.TabPane tab={category.name} key={category.id}>
+                    <div className="p-2 sm:p-4">
+                      {window.innerWidth < 768 ? (
+                        // Mobile view - card layout for category-specific view
+                        <div className="space-y-2">
+                          {categoryArticles
+                            .filter(article => article.category === category.id)
+                            .map(article => (
+                              <div key={article.id} className="article-card">
+                                <div className="article-card-header">
+                                  {article.image && (
+                                    <img 
+                                      src={article.image} 
+                                      alt={article.title} 
+                                      className="w-16 h-16 object-cover rounded"
+                                    />
+                                  )}
+                                  <div className="article-card-content">
+                                    <h4 className="article-card-title line-clamp-1">{article.title}</h4>
+                                    <p className="article-card-summary line-clamp-2">{article.summary}</p>
+                                    <div className="flex items-center mt-1">
+                                      <span className={`px-2 py-1 rounded-full text-xs ${
+                                        article.status === 'published' 
+                                          ? 'bg-green-100 text-green-800' 
+                                          : 'bg-yellow-100 text-yellow-800'
+                                      }`}>
+                                        {article.status.charAt(0).toUpperCase() + article.status.slice(1)}
+                                      </span>
+                                      <span className="text-xs text-gray-500 ml-2">
+                                        {new Date(article.updatedAt).toLocaleDateString()}
+                                      </span>
+                                    </div>
+                                  </div>
+                                </div>
+                                <div className="article-card-footer">
+                                  <div className="article-card-actions">
+                                    <button onClick={() => handleArticleEdit(article.id)}>
+                                      <EditOutlined className="text-blue-500" />
+                                    </button>
+                                    <button onClick={() => window.open(`/categories?article=${article.id}`, '_blank')}>
+                                      <EyeOutlined className="text-gray-500" />
+                                    </button>
+                                    <button onClick={() => handleArticleDelete(article.id)}>
+                                      <DeleteOutlined className="text-red-500" />
+                                    </button>
+                                  </div>
+                                </div>
+                              </div>
+                            ))}
+                        </div>
+                      ) : (
+                        // Desktop view - table layout
+                        <Table
+                          dataSource={categoryArticles.filter(article => article.category === category.id)}
+                          rowKey="id"
+                          columns={[
+                            {
+                              title: 'Title',
+                              dataIndex: 'title',
+                              key: 'title',
+                              render: (text, record) => (
+                                <div className="flex items-center">
+                                  {record.image && (
+                                    <img 
+                                      src={record.image} 
+                                      alt={text} 
+                                      className="w-12 h-12 object-cover rounded mr-3"
+                                    />
+                                  )}
+                                  <div>
+                                    <div className="font-medium">{text}</div>
+                                    <div className="text-xs text-gray-500">
+                                      {new Date(record.updatedAt).toLocaleDateString()}
+                                    </div>
+                                  </div>
+                                </div>
+                              ),
+                            },
+                            {
+                              title: 'Summary',
+                              dataIndex: 'summary',
+                              key: 'summary',
+                              ellipsis: true,
+                            },
+                            {
+                              title: 'Status',
+                              dataIndex: 'status',
+                              key: 'status',
+                              render: status => (
+                                <span className={`px-2 py-1 rounded-full text-xs ${
+                                  status === 'published' 
+                                    ? 'bg-green-100 text-green-800' 
+                                    : 'bg-yellow-100 text-yellow-800'
+                                }`}>
+                                  {status.charAt(0).toUpperCase() + status.slice(1)}
+                                </span>
+                              ),
+                            },
+                            {
+                              title: 'Actions',
+                              key: 'actions',
+                              render: (_, record) => (
+                                <div className="flex space-x-2">
+                                  <Button 
+                                    icon={<EditOutlined />} 
+                                    size="small"
+                                    onClick={() => handleArticleEdit(record.id)}
+                                  >
+                                    Edit
+                                  </Button>
+                                  <Button 
+                                    icon={<EyeOutlined />} 
+                                    size="small"
+                                    onClick={() => window.open(`/categories?article=${record.id}`, '_blank')}
+                                  >
+                                    View
+                                  </Button>
+                                  <Button 
+                                    icon={<DeleteOutlined />} 
+                                    size="small"
+                                    danger
+                                    onClick={() => handleArticleDelete(record.id)}
+                                  >
+                                    Delete
+                                  </Button>
+                                </div>
+                              ),
+                            },
+                          ]}
+                          pagination={{ pageSize: 10 }}
+                        />
+                      )}
+                    </div>
+                  </Tabs.TabPane>
+                ))}
+              </Tabs>
+            </div>
+            
+            {/* Category Display Settings Modal */}
+            <Modal
+              title="Category Display Settings"
+              open={showCategoryDisplaySettings}
+              onCancel={() => setShowCategoryDisplaySettings(false)}
+              footer={[
+                <Button key="cancel" onClick={() => setShowCategoryDisplaySettings(false)}>
+                  Cancel
+                </Button>,
+                <Button 
+                  key="save" 
+                  type="primary" 
+                  onClick={handleSaveCategoryDisplaySettings}
+                >
+                  Save Settings
+                </Button>
+              ]}
+              width={window.innerWidth < 640 ? "95%" : 520}
+            >
+              <Form layout="vertical">
+                <div className="mb-4">
+                  <h4 className="font-medium text-gray-700 mb-2 text-sm sm:text-base">Specify how many categories to show on each device type</h4>
+                  <p className="text-xs sm:text-sm text-gray-500 mb-4">This will control how many categories are visible on the homepage and category pages by device type.</p>
+                </div>
+                
+                <Form.Item label="Desktop (PC)">
+                  <InputNumber 
+                    min={2} 
+                    max={12} 
+                    value={categoryDisplaySettings.desktop}
+                    onChange={value => setCategoryDisplaySettings({...categoryDisplaySettings, desktop: value})}
+                    className="w-full" 
+                  />
+                  <div className="text-xs text-gray-500 mt-1">
+                    Recommended: 4, 8, or 12 for grid layouts
+                  </div>
+                </Form.Item>
+                
+                <Form.Item label="Tablet">
+                  <InputNumber 
+                    min={2} 
+                    max={6} 
+                    value={categoryDisplaySettings.tablet}
+                    onChange={value => setCategoryDisplaySettings({...categoryDisplaySettings, tablet: value})}
+                    className="w-full" 
+                  />
+                  <div className="text-xs text-gray-500 mt-1">
+                    Recommended: 2 or 4 for optimal viewing
+                  </div>
+                </Form.Item>
+                
+                <Form.Item label="Mobile Phone">
+                  <InputNumber 
+                    min={1} 
+                    max={4} 
+                    value={categoryDisplaySettings.mobile}
+                    onChange={value => setCategoryDisplaySettings({...categoryDisplaySettings, mobile: value})}
+                    className="w-full" 
+                  />
+                  <div className="text-xs text-gray-500 mt-1">
+                    Recommended: 1 or 2 for best mobile experience
+                  </div>
+                </Form.Item>
+                
+                <div className="mt-4 p-3 sm:p-4 bg-blue-50 rounded-md">
+                  <div className="flex items-start">
+                    <div className="mr-2 flex-shrink-0">
+                      <svg className="h-5 w-5 text-blue-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                        <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                      </svg>
+                    </div>
+                    <div className="text-xs sm:text-sm text-blue-700">
+                      <p>These settings will be applied to the category displays on the homepage. Changes will be visible immediately after saving.</p>
+                    </div>
+                  </div>
+                </div>
+              </Form>
+            </Modal>
+            
+            {/* Article Form Modal */}
+            <Modal
+              title={editingArticle ? "Edit Article" : "Add New Article"}
+              open={articleFormVisible}
+              onCancel={() => setArticleFormVisible(false)}
+              footer={[
+                <Button key="cancel" onClick={() => setArticleFormVisible(false)}>
+                  Cancel
+                </Button>,
+                <Button 
+                  key="submit" 
+                  type="primary" 
+                  onClick={handleArticleFormSubmit}
+                >
+                  {editingArticle ? "Update" : "Add"} Article
+                </Button>
+              ]}
+              width={window.innerWidth < 768 ? "95%" : 800}
+              bodyStyle={{ maxHeight: window.innerWidth < 768 ? "70vh" : "auto", overflowY: "auto" }}
+            >
+              <Form layout="vertical" className="mt-2 sm:mt-4">
+                <Form.Item 
+                  label="Title" 
+                  required
+                  rules={[{ required: true, message: 'Please enter a title' }]}
+                >
+                  <Input 
+                    value={articleFormData.title} 
+                    onChange={e => setArticleFormData({...articleFormData, title: e.target.value})}
+                    placeholder="Article title"
+                  />
+                </Form.Item>
+                
+                <Form.Item 
+                  label="Category" 
+                  required
+                  rules={[{ required: true, message: 'Please select a category' }]}
+                >
+                  <Select
+                    value={articleFormData.category}
+                    onChange={value => setArticleFormData({...articleFormData, category: value})}
+                    placeholder="Select a category"
+                  >
+                    {categories.filter(c => c.id !== 'all').map(category => (
+                      <Select.Option key={category.id} value={category.id}>
+                        {category.name}
+                      </Select.Option>
+                    ))}
+                  </Select>
+                </Form.Item>
+                
+                <Form.Item label="Summary">
+                  <Input.TextArea 
+                    value={articleFormData.summary} 
+                    onChange={e => setArticleFormData({...articleFormData, summary: e.target.value})}
+                    placeholder="Brief summary of the article"
+                    rows={window.innerWidth < 768 ? 2 : 3}
+                  />
+                </Form.Item>
+                
+                <Form.Item label="Image URL">
+                  <Input 
+                    value={articleFormData.image} 
+                    onChange={e => setArticleFormData({...articleFormData, image: e.target.value})}
+                    placeholder="https://example.com/image.jpg"
+                  />
+                  {articleFormData.image && (
+                    <div className="mt-2">
+                      <img 
+                        src={articleFormData.image} 
+                        alt="Preview" 
+                        className="max-h-32 sm:max-h-40 rounded-md"
+                        onError={e => e.target.style.display = 'none'}
+                        onLoad={e => e.target.style.display = 'block'}
+                      />
+                    </div>
+                  )}
+                </Form.Item>
+                
+                <Form.Item label="Content">
+                  <Input.TextArea 
+                    value={articleFormData.content} 
+                    onChange={e => setArticleFormData({...articleFormData, content: e.target.value})}
+                    placeholder="Article content in HTML format"
+                    rows={window.innerWidth < 768 ? 6 : 8}
+                    className="font-mono text-xs sm:text-sm mobile-editor"
+                  />
+                  <div className="text-xs text-gray-500 mt-1">
+                    HTML formatting is supported. You can use tags like &lt;h2&gt;, &lt;p&gt;, &lt;ul&gt;, etc.
+                  </div>
+                </Form.Item>
+                
+                <Form.Item label="Status">
+                  <Select
+                    value={articleFormData.status}
+                    onChange={value => setArticleFormData({...articleFormData, status: value})}
+                  >
+                    <Select.Option value="draft">Draft</Select.Option>
+                    <Select.Option value="published">Published</Select.Option>
+                  </Select>
+                </Form.Item>
+              </Form>
+            </Modal>
+          </div>
+        );
+      case 'marketing-materials':
+        return (
+          <div className="bg-white shadow rounded-lg">
+            <div className="px-4 py-5 sm:px-6 border-b border-gray-200">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-xl font-bold text-gray-900">Marketing Materials</h3>
+                  <p className="mt-1 text-sm text-gray-500">Manage marketing materials for affiliates in different languages and regions.</p>
+                </div>
+              </div>
+            </div>
+            <div className="px-4 py-5 sm:p-6">
+              <MarketingMaterialsUpload />
+            </div>
+          </div>
+        );
+      case 'subscription-plans':
+        return (
+          <div className="bg-white shadow rounded-lg">
+            <div className="px-4 py-5 sm:px-6 border-b border-gray-200">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-xl font-bold text-gray-900">Subscription Plans</h3>
+                  <p className="mt-1 text-sm text-gray-500">Manage subscription plans that merchants can purchase.</p>
+                </div>
+                <Button 
+                  type="primary"
+                  onClick={handlePlanAdd}
+                  icon={<PlusOutlined />}
+                >
+                  Add Plan
+                </Button>
+              </div>
+            </div>
+            <div className="px-4 py-5 sm:p-6">
+              {subscriptionPlans.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {subscriptionPlans.map(plan => (
+                    <div key={plan.id} className={`border rounded-lg overflow-hidden ${plan.active ? 'border-gray-200' : 'border-gray-200 opacity-60'}`}>
+                      <div className="p-6 bg-gray-50 border-b border-gray-200">
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <h4 className="text-lg font-semibold">{plan.name}</h4>
+                            <p className="text-sm text-gray-500 mt-1">{plan.description}</p>
+                          </div>
+                          <div>
+                            <Switch 
+                              checked={plan.active} 
+                              onChange={() => handlePlanToggleStatus(plan.id)}
+                            />
+                          </div>
+                        </div>
+                        
+                        <div className="mt-4 space-y-2">
+                          {plan.prices.map((price, idx) => (
+                            <div key={idx} className="border-t pt-2">
+                              <div className="flex items-center justify-between mb-1">
+                                <span className="text-sm font-medium">{price.country} ({price.language})</span>
+                                <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
+                                  {price.currency}
+                                </span>
+                              </div>
+                              <div className="flex flex-col">
+                                <div className="flex justify-between">
+                                  <span className="text-sm">Monthly:</span>
+                                  <span className="text-sm font-medium">{price.symbol}{price.monthly}</span>
+                                </div>
+                                <div className="flex justify-between">
+                                  <span className="text-sm">Annual:</span>
+                                  <span className="text-sm font-medium">
+                                    {price.symbol}{price.annual} 
+                                    <span className="text-green-600 text-xs ml-1">
+                                      Save {price.discountPercentage}%
+                                    </span>
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                      <div className="p-6">
+                        <h5 className="font-medium mb-3">Features</h5>
+                        <ul className="space-y-2">
+                          {plan.features.map((feature, idx) => (
+                            <li key={idx} className="flex items-start">
+                              <svg className="h-5 w-5 text-green-500 mr-2 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                              </svg>
+                              <span className="text-sm">{feature}</span>
+                            </li>
+                          ))}
+                        </ul>
+                        <div className="mt-6 flex space-x-3">
+                          <Button 
+                            type="default" 
+                            onClick={() => handlePlanEdit(plan.id)}
+                            icon={<EditOutlined />}
+                            block
+                          >
+                            Edit
+                          </Button>
+                          <Button 
+                            type="default" 
+                            danger
+                            onClick={() => handlePlanDelete(plan.id)}
+                            icon={<DeleteOutlined />}
+                          >
+                            Delete
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-10">
+                  <div className="mx-auto h-12 w-12 text-gray-400">
+                    <svg className="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                    </svg>
+                  </div>
+                  <h3 className="mt-2 text-sm font-medium text-gray-900">No plans</h3>
+                  <p className="mt-1 text-sm text-gray-500">Get started by creating a new subscription plan.</p>
+                  <div className="mt-6">
+                    <Button 
+                      type="primary" 
+                      onClick={handlePlanAdd}
+                      icon={<PlusOutlined />}
+                    >
+                      Add Plan
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Subscription Plan Form Modal */}
+            <Modal
+              title={editingPlan ? "Edit Subscription Plan" : "Add Subscription Plan"}
+              open={planFormVisible}
+              onCancel={() => setPlanFormVisible(false)}
+              footer={[
+                <Button key="cancel" onClick={() => setPlanFormVisible(false)}>
+                  Cancel
+                </Button>,
+                <Button 
+                  key="save" 
+                  type="primary" 
+                  onClick={handlePlanSave}
+                >
+                  {editingPlan ? "Update Plan" : "Create Plan"}
+                </Button>
+              ]}
+              width={window.innerWidth < 640 ? "95%" : 700}
+            >
+              <Form layout="vertical">
+                <Form.Item label="Plan Name" required>
+                  <Input
+                    value={planFormData.name}
+                    onChange={e => setPlanFormData({...planFormData, name: e.target.value})}
+                    placeholder="e.g. Basic Plan"
+                  />
+                </Form.Item>
+                
+                <Form.Item label="Description">
+                  <Input.TextArea
+                    value={planFormData.description}
+                    onChange={e => setPlanFormData({...planFormData, description: e.target.value})}
+                    placeholder="Brief description of this plan"
+                    rows={2}
+                  />
+                </Form.Item>
+                
+                <div className="mb-4">
+                  <div className="flex justify-between items-center mb-2">
+                    <h4 className="text-base font-medium">Pricing Options</h4>
+                    <Button 
+                      type="primary"
+                      size="small"
+                      onClick={handleAddPriceOption}
+                      icon={<PlusOutlined />}
+                    >
+                      Add Country Price
+                    </Button>
+                  </div>
+                  
+                  <div className="space-y-6">
+                    {planFormData.prices.map((price, index) => (
+                      <div key={index} className="border p-4 rounded-md">
+                        <div className="flex justify-between items-center mb-3">
+                          <h5 className="font-medium">Pricing for Region #{index + 1}</h5>
+                          {planFormData.prices.length > 1 && (
+                            <Button 
+                              type="text" 
+                              danger
+                              icon={<DeleteOutlined />}
+                              onClick={() => handleRemovePriceOption(index)}
+                              size="small"
+                            />
+                          )}
+                        </div>
+                        
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <Form.Item label="Country" required>
+                            <Input
+                              value={price.country}
+                              onChange={e => handlePriceChange(index, 'country', e.target.value)}
+                              placeholder="e.g. USA"
+                            />
+                          </Form.Item>
+                          
+                          <Form.Item label="Language" required>
+                            <Input
+                              value={price.language}
+                              onChange={e => handlePriceChange(index, 'language', e.target.value)}
+                              placeholder="e.g. English"
+                            />
+                          </Form.Item>
+                          
+                          <Form.Item label="Currency Code" required>
+                            <Input
+                              value={price.currency}
+                              onChange={e => handlePriceChange(index, 'currency', e.target.value)}
+                              placeholder="e.g. USD"
+                            />
+                          </Form.Item>
+                          
+                          <Form.Item label="Currency Symbol" required>
+                            <Input
+                              value={price.symbol}
+                              onChange={e => handlePriceChange(index, 'symbol', e.target.value)}
+                              placeholder="e.g. $"
+                            />
+                          </Form.Item>
+                          
+                          <Form.Item label="Monthly Price" required>
+                            <Input
+                              type="number"
+                              min="0"
+                              step="0.01"
+                              value={price.monthly}
+                              onChange={e => handlePriceChange(index, 'monthly', parseFloat(e.target.value))}
+                              prefix={price.symbol || '$'}
+                            />
+                          </Form.Item>
+                          
+                          <Form.Item label="Annual Discount (%)" required tooltip="Discount percentage applied to yearly subscription">
+                            <Input
+                              type="number"
+                              min="0"
+                              max="100"
+                              value={price.discountPercentage}
+                              onChange={e => handlePriceChange(index, 'discountPercentage', parseFloat(e.target.value))}
+                              suffix="%"
+                            />
+                          </Form.Item>
+                          
+                          <Form.Item label="Annual Price (calculated)">
+                            <Input
+                              value={price.annual}
+                              disabled
+                              prefix={price.symbol || '$'}
+                              suffix={`(${price.monthly * 12 * (1 - price.discountPercentage / 100)} / year)`}
+                            />
+                          </Form.Item>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                
+                <Form.Item label="Features">
+                  <div className="flex flex-col space-y-2">
+                    {planFormData.features.map((feature, index) => (
+                      <div key={index} className="flex">
+                        <Input
+                          value={feature}
+                          onChange={e => {
+                            const updatedFeatures = [...planFormData.features];
+                            updatedFeatures[index] = e.target.value;
+                            setPlanFormData({...planFormData, features: updatedFeatures});
+                          }}
+                          className="flex-grow"
+                        />
+                        <Button 
+                          type="text" 
+                          danger
+                          icon={<DeleteOutlined />}
+                          onClick={() => {
+                            const updatedFeatures = planFormData.features.filter((_, i) => i !== index);
+                            setPlanFormData({...planFormData, features: updatedFeatures});
+                          }}
+                        />
+                      </div>
+                    ))}
+                    <Button 
+                      type="dashed" 
+                      onClick={() => setPlanFormData({
+                        ...planFormData, 
+                        features: [...planFormData.features, '']
+                      })}
+                      icon={<PlusOutlined />}
+                    >
+                      Add Feature
+                    </Button>
+                  </div>
+                </Form.Item>
+              </Form>
+            </Modal>
+          </div>
+        );
+      case 'media-assets':
+        return (
+          <div className="bg-white shadow rounded-lg">
+            <div className="px-4 py-5 sm:px-6 border-b border-gray-200">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-xl font-bold text-gray-900">Media Assets</h3>
+                  <p className="mt-1 text-sm text-gray-500">Upload and manage media assets for different devices, languages, and regions.</p>
+                </div>
+              </div>
+            </div>
+            <div className="px-4 py-5 sm:p-6">
+              <Tabs defaultActiveKey="1">
+                <Tabs.TabPane tab="Header Media" key="1">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                    <Card title="Device" size="small">
+                      <Radio.Group defaultValue="desktop">
+                        <div className="space-y-2">
+                          <div><Radio value="desktop">Desktop <DesktopOutlined /></Radio></div>
+                          <div><Radio value="tablet">Tablet <TabletOutlined /></Radio></div>
+                          <div><Radio value="mobile">Mobile <MobileOutlined /></Radio></div>
+                        </div>
+                      </Radio.Group>
+                    </Card>
+                    <Card title="Language" size="small">
+                      <Select defaultValue="en" style={{ width: '100%' }}>
+                        <Select.Option value="en">English</Select.Option>
+                        <Select.Option value="es">Spanish</Select.Option>
+                        <Select.Option value="fr">French</Select.Option>
+                      </Select>
+                    </Card>
+                    <Card title="Region" size="small">
+                      <Select defaultValue="global" style={{ width: '100%' }}>
+                        <Select.Option value="global">Global</Select.Option>
+                        <Select.Option value="us">United States</Select.Option>
+                        <Select.Option value="eu">Europe</Select.Option>
+                      </Select>
+                    </Card>
+                  </div>
+                  <Card title="Upload Header Media">
+                    <Upload.Dragger>
+                      <p className="ant-upload-drag-icon">
+                        <FileImageOutlined style={{ fontSize: '3rem', color: '#40a9ff' }} />
+                      </p>
+                      <p className="ant-upload-text">Click or drag file to this area to upload</p>
+                      <p className="ant-upload-hint">Support for images and videos</p>
+                    </Upload.Dragger>
+                    <Button type="primary" className="mt-4">Save Media</Button>
+                  </Card>
+                </Tabs.TabPane>
+                <Tabs.TabPane tab="Demo Videos" key="2">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                    <Card title="Language" size="small">
+                      <Select defaultValue="en" style={{ width: '100%' }}>
+                        <Select.Option value="en">English</Select.Option>
+                        <Select.Option value="es">Spanish</Select.Option>
+                        <Select.Option value="fr">French</Select.Option>
+                      </Select>
+                    </Card>
+                    <Card title="Region" size="small">
+                      <Select defaultValue="us" style={{ width: '100%' }}>
+                        <Select.Option value="us">United States</Select.Option>
+                        <Select.Option value="eu">Europe</Select.Option>
+                        <Select.Option value="global">Global</Select.Option>
+                      </Select>
+                    </Card>
+                    <Card title="Popup" size="small">
+                      <Select defaultValue="scan" style={{ width: '100%' }}>
+                        <Select.Option value="scan">How to Scan</Select.Option>
+                        <Select.Option value="welcome">Welcome</Select.Option>
+                        <Select.Option value="tutorial">Tutorial</Select.Option>
+                      </Select>
+                    </Card>
+                  </div>
+                  <Card title="Upload Demo Video">
+                    <Upload.Dragger>
+                      <p className="ant-upload-drag-icon">
+                        <VideoCameraOutlined style={{ fontSize: '3rem', color: '#40a9ff' }} />
+                      </p>
+                      <p className="ant-upload-text">Click or drag video to this area to upload</p>
+                      <p className="ant-upload-hint">Support for demo videos</p>
+                    </Upload.Dragger>
+                    <Input.TextArea 
+                      placeholder="Video description..."
+                      className="mt-4"
+                      rows={3}
+                    />
+                    <Button type="primary" className="mt-4">Save Demo Video</Button>
+                  </Card>
+                </Tabs.TabPane>
+              </Tabs>
+            </div>
+          </div>
+        );
+      case 'social-media':
+        return (
+          <div className="bg-white shadow rounded-lg">
+            <div className="px-4 py-5 sm:px-6 border-b border-gray-200">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-xl font-bold text-gray-900">Social Media Management</h3>
+                  <p className="mt-1 text-sm text-gray-500">Connect your brand's social media accounts and manage visibility across the platform.</p>
+                </div>
+                <Button 
+                  type="primary" 
+                  icon={<PlusOutlined />} 
+                  onClick={handleAddSocialMedia}
+                >
+                  Add Social Link
+                </Button>
+              </div>
+            </div>
+            <div className="px-4 py-5 sm:p-6">
+              {socialMediaLinks.length > 0 ? (
+                <div className="overflow-x-auto">
+                  <Table
+                    dataSource={socialMediaLinks}
+                    rowKey="id"
+                    columns={[
+                      {
+                        title: 'Platform',
+                        dataIndex: 'name',
+                        key: 'name',
+                        render: (text, record) => (
+                          <div className="flex items-center">
+                            <div className="flex-shrink-0 h-10 w-10 rounded-full bg-gray-100 flex items-center justify-center">
+                              {/* Icon representation - in a real app you would use actual icons */}
+                              {record.platform === 'facebook' && <span className="text-blue-600 font-bold">f</span>}
+                              {record.platform === 'instagram' && <span className="text-pink-600 font-bold">Ig</span>}
+                              {record.platform === 'twitter' && <span className="text-blue-400 font-bold">X</span>}
+                              {record.platform === 'linkedin' && <span className="text-blue-700 font-bold">in</span>}
+                              {record.platform === 'youtube' && <span className="text-red-600 font-bold">YT</span>}
+                              {record.platform === 'pinterest' && <span className="text-red-600 font-bold">P</span>}
+                              {record.platform === 'tiktok' && <span className="font-bold">TT</span>}
+                              {record.platform === 'snapchat' && <span className="text-yellow-400 font-bold">Sc</span>}
+                              {!['facebook', 'instagram', 'twitter', 'linkedin', 'youtube', 'pinterest', 'tiktok', 'snapchat'].includes(record.platform) && 
+                                <span className="text-gray-500 font-bold">@</span>}
+                            </div>
+                            <div className="ml-4">
+                              <div className="text-sm font-medium text-gray-900">{text}</div>
+                              <div className="text-xs text-gray-500">{record.platform}</div>
+                            </div>
+                          </div>
+                        ),
+                      },
+                      {
+                        title: 'URL',
+                        dataIndex: 'url',
+                        key: 'url',
+                        render: (text) => (
+                          <a 
+                            href={text} 
+                            target="_blank" 
+                            rel="noopener noreferrer" 
+                            className="text-blue-600 hover:underline"
+                          >
+                            {text}
+                          </a>
+                        ),
+                      },
+                      {
+                        title: 'Status',
+                        dataIndex: 'enabled',
+                        key: 'enabled',
+                        render: (enabled) => (
+                          <span className={`px-2 py-1 rounded-full text-xs ${
+                            enabled ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
+                          }`}>
+                            {enabled ? 'Active' : 'Inactive'}
+                          </span>
+                        ),
+                      },
+                      {
+                        title: 'Actions',
+                        key: 'actions',
+                        render: (_, record) => (
+                          <div className="flex space-x-2">
+                            <Button 
+                              icon={<EditOutlined />} 
+                              size="small"
+                              onClick={() => handleEditSocialMedia(record.id)}
+                            >
+                              Edit
+                            </Button>
+                            <Button 
+                              icon={record.enabled ? <LockOutlined /> : <UnlockOutlined />} 
+                              size="small"
+                              onClick={() => handleToggleSocialMediaStatus(record.id)}
+                            >
+                              {record.enabled ? 'Disable' : 'Enable'}
+                            </Button>
+                            <Button 
+                              icon={<DeleteOutlined />} 
+                              size="small"
+                              danger
+                              onClick={() => handleDeleteSocialMedia(record.id)}
+                            >
+                              Delete
+                            </Button>
+                          </div>
+                        ),
+                      },
+                    ]}
+                    pagination={false}
+                  />
+                </div>
+              ) : (
+                <div className="text-center py-10">
+                  <div className="mx-auto h-12 w-12 text-gray-400">
+                    <svg className="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg>
+                  </div>
+                  <h3 className="mt-2 text-sm font-medium text-gray-900">No social links</h3>
+                  <p className="mt-1 text-sm text-gray-500">Get started by adding a social media link.</p>
+                  <div className="mt-6">
+                    <Button 
+                      type="primary" 
+                      onClick={handleAddSocialMedia}
+                      icon={<PlusOutlined />}
+                    >
+                      Add Social Link
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Social Media Form Modal */}
+            <Modal
+              title={editingSocialMedia ? "Edit Social Media Link" : "Add Social Media Link"}
+              open={socialMediaFormVisible}
+              onCancel={() => setSocialMediaFormVisible(false)}
+              footer={[
+                <Button key="cancel" onClick={() => setSocialMediaFormVisible(false)}>
+                  Cancel
+                </Button>,
+                <Button 
+                  key="save" 
+                  type="primary" 
+                  onClick={handleSaveSocialMedia}
+                >
+                  {editingSocialMedia ? "Update" : "Add"} Link
+                </Button>
+              ]}
+              width={500}
+            >
+              <Form layout="vertical" className="mt-4">
+                <Form.Item 
+                  label="Platform" 
+                  required
+                  rules={[{ required: true, message: 'Please select a platform' }]}
+                >
+                  <Select
+                    value={socialMediaFormData.platform}
+                    onChange={(value) => setSocialMediaFormData({...socialMediaFormData, platform: value, icon: value})}
+                    placeholder="Select a social media platform"
+                  >
+                    <Select.Option value="facebook">Facebook</Select.Option>
+                    <Select.Option value="instagram">Instagram</Select.Option>
+                    <Select.Option value="twitter">Twitter</Select.Option>
+                    <Select.Option value="linkedin">LinkedIn</Select.Option>
+                    <Select.Option value="youtube">YouTube</Select.Option>
+                    <Select.Option value="pinterest">Pinterest</Select.Option>
+                    <Select.Option value="tiktok">TikTok</Select.Option>
+                    <Select.Option value="snapchat">Snapchat</Select.Option>
+                    <Select.Option value="other">Other</Select.Option>
+                  </Select>
+                </Form.Item>
+                
+                <Form.Item 
+                  label="Display Name" 
+                  required
+                  rules={[{ required: true, message: 'Please enter a display name' }]}
+                >
+                  <Input 
+                    value={socialMediaFormData.name} 
+                    onChange={(e) => setSocialMediaFormData({...socialMediaFormData, name: e.target.value})}
+                    placeholder="e.g. Facebook, Instagram, etc."
+                  />
+                </Form.Item>
+                
+                <Form.Item 
+                  label="URL" 
+                  required
+                  rules={[
+                    { required: true, message: 'Please enter a URL' },
+                    { type: 'url', message: 'Please enter a valid URL' }
+                  ]}
+                >
+                  <Input 
+                    value={socialMediaFormData.url} 
+                    onChange={(e) => setSocialMediaFormData({...socialMediaFormData, url: e.target.value})}
+                    placeholder="https://example.com/your-profile"
+                  />
+                  <div className="text-xs text-gray-500 mt-1">
+                    Enter the full URL including https://
+                  </div>
+                </Form.Item>
+                
+                <Form.Item label="Status">
+                  <Switch 
+                    checked={socialMediaFormData.enabled} 
+                    onChange={(checked) => setSocialMediaFormData({...socialMediaFormData, enabled: checked})}
+                  />
+                  <span className="ml-2 text-sm text-gray-500">
+                    {socialMediaFormData.enabled ? 'Active' : 'Inactive'}
+                  </span>
+                </Form.Item>
+              </Form>
+            </Modal>
+          </div>
+        );
+    }
+  };
+
+  // Define HelpCenter component
+  const HelpCenter = () => (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
+        <div className="flex justify-between items-center p-4 border-b">
+          <h2 className="text-xl font-bold">Help Center</h2>
+          <button 
+            onClick={() => setHelpCenterVisible(false)}
+            className="text-gray-400 hover:text-gray-500"
+          >
+            <CloseCircleOutlined style={{ fontSize: '1.5rem' }} />
+          </button>
+        </div>
+        <div className="p-6 overflow-y-auto">
+          <h3 className="text-lg font-medium mb-4">Frequently Asked Questions</h3>
+          <div className="space-y-4">
+            <div>
+              <h4 className="font-medium">How do I upload media assets?</h4>
+              <p className="text-gray-600">Navigate to the Media Assets tab, select your target device, language and region, then upload your file using the upload area.</p>
+            </div>
+            <div>
+              <h4 className="font-medium">How do I link demo videos to popups?</h4>
+              <p className="text-gray-600">In the Demo Videos section, select a language, region, and popup from the dropdown menus before uploading your video.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
+  return (
+    <AdminLayout>
+      <div className="flex flex-col h-full">
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row justify-between items-center p-4 border-b gap-4">
+          <h1 className="text-2xl font-bold">Dashboard</h1>
+          <div className="flex space-x-4">
+            <button 
+              onClick={() => setHelpCenterVisible(true)}
+              className="px-3 sm:px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 flex items-center text-sm sm:text-base"
+            >
+              <MessageOutlined className="mr-1 sm:mr-2" /> Help Center
+            </button>
+            <button 
+              onClick={onLogout}
+              className="px-3 sm:px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 flex items-center text-sm sm:text-base"
+            >
+              <UserOutlined className="mr-1 sm:mr-2" /> Logout
+            </button>
+          </div>
+        </div>
+
+        {/* Tabs - Making this section responsive with horizontal scrolling */}
+        <div className="border-b overflow-hidden">
+          <div className="overflow-x-auto pb-1 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
+            <div className="flex whitespace-nowrap p-4 min-w-max">
+          <button 
+            onClick={() => setActiveTab('overview')}
+                className={`px-4 py-2 mr-4 ${activeTab === 'overview' ? 'border-b-2 border-blue-500 font-medium' : 'text-gray-500 hover:text-gray-700'}`}
+          >
+            Overview
+          </button>
+          <button 
+            onClick={() => setActiveTab('customers')}
+                className={`px-4 py-2 mr-4 ${activeTab === 'customers' ? 'border-b-2 border-blue-500 font-medium' : 'text-gray-500 hover:text-gray-700'}`}
+          >
+            Customers
+          </button>
+          <button 
+            onClick={() => setActiveTab('merchants')}
+                className={`px-4 py-2 mr-4 ${activeTab === 'merchants' ? 'border-b-2 border-blue-500 font-medium' : 'text-gray-500 hover:text-gray-700'}`}
+          >
+            Merchants
+          </button>
+          <button 
+            onClick={() => setActiveTab('affiliates')}
+                className={`px-4 py-2 mr-4 ${activeTab === 'affiliates' ? 'border-b-2 border-blue-500 font-medium' : 'text-gray-500 hover:text-gray-700'}`}
+          >
+            Affiliates
+          </button>
+          <button 
+            onClick={() => setActiveTab('marketing-materials')}
+                className={`px-4 py-2 mr-4 ${activeTab === 'marketing-materials' ? 'border-b-2 border-blue-500 font-medium' : 'text-gray-500 hover:text-gray-700'}`}
+          >
+            Marketing Materials
+          </button>
+          <button 
+            onClick={() => setActiveTab('popups')}
+                className={`px-4 py-2 mr-4 ${activeTab === 'popups' ? 'border-b-2 border-blue-500 font-medium' : 'text-gray-500 hover:text-gray-700'}`}
+          >
+            Popups
+          </button>
+          <button 
+            onClick={() => setActiveTab('settings')}
+                className={`px-4 py-2 mr-4 ${activeTab === 'settings' ? 'border-b-2 border-blue-500 font-medium' : 'text-gray-500 hover:text-gray-700'}`}
+          >
+            Settings
+          </button>
+          <button 
+            onClick={() => setActiveTab('categories')}
+                className={`px-4 py-2 mr-4 ${activeTab === 'categories' ? 'border-b-2 border-blue-500 font-medium' : 'text-gray-500 hover:text-gray-700'}`}
+          >
+            Categories
+          </button>
+          <button 
+            onClick={() => setActiveTab('about')}
+                className={`px-4 py-2 mr-4 ${activeTab === 'about' ? 'border-b-2 border-blue-500 font-medium' : 'text-gray-500 hover:text-gray-700'}`}
+          >
+            About
+          </button>
+          <button 
+            onClick={() => setActiveTab('contact')}
+                className={`px-4 py-2 mr-4 ${activeTab === 'contact' ? 'border-b-2 border-blue-500 font-medium' : 'text-gray-500 hover:text-gray-700'}`}
+          >
+            Contact
+          </button>
+          <button 
+            onClick={() => setActiveTab('seo')}
+                className={`px-4 py-2 mr-4 ${activeTab === 'seo' ? 'border-b-2 border-blue-500 font-medium' : 'text-gray-500 hover:text-gray-700'}`}
+          >
+            SEO
+          </button>
+          <button 
+            onClick={() => setActiveTab('chat')}
+                className={`px-4 py-2 mr-4 ${activeTab === 'chat' ? 'border-b-2 border-blue-500 font-medium' : 'text-gray-500 hover:text-gray-700'}`}
+          >
+            Chat
+          </button>
+          <button 
+            onClick={() => setActiveTab('reviews')}
+                className={`px-4 py-2 mr-4 ${activeTab === 'reviews' ? 'border-b-2 border-blue-500 font-medium' : 'text-gray-500 hover:text-gray-700'}`}
+          >
+            Reviews
+          </button>
+          <button 
+            onClick={() => setActiveTab('pages')}
+                className={`px-4 py-2 mr-4 ${activeTab === 'pages' ? 'border-b-2 border-blue-500 font-medium' : 'text-gray-500 hover:text-gray-700'}`}
+          >
+            Pages
+          </button>
+          <button 
+            onClick={() => setActiveTab('analytics')}
+                className={`px-4 py-2 mr-4 ${activeTab === 'analytics' ? 'border-b-2 border-blue-500 font-medium' : 'text-gray-500 hover:text-gray-700'}`}
+          >
+            Analytics
+          </button>
+          <button 
+            onClick={() => setActiveTab('subscriptions')}
+                className={`px-4 py-2 mr-4 ${activeTab === 'subscriptions' ? 'border-b-2 border-blue-500 font-medium' : 'text-gray-500 hover:text-gray-700'}`}
+          >
+            Subscriptions
+          </button>
+          <button 
+            onClick={() => navigateToTab('category-articles')}
+                className={`px-4 py-2 ${activeTab === 'category-articles' ? 'border-b-2 border-blue-500 font-medium' : 'text-gray-500 hover:text-gray-700'}`}
+          >
+            Category Articles
+          </button>
+          <button 
+            onClick={() => setActiveTab('subscription-plans')}
+                className={`px-4 py-2 mr-4 ${activeTab === 'subscription-plans' ? 'border-b-2 border-blue-500 font-medium' : 'text-gray-500 hover:text-gray-700'}`}
+          >
+            Subscription Plans
+          </button>
+          <button 
+            onClick={() => setActiveTab('media-assets')}
+                className={`px-4 py-2 mr-4 ${activeTab === 'media-assets' ? 'border-b-2 border-blue-500 font-medium' : 'text-gray-500 hover:text-gray-700'}`}
+          >
+            Media Assets
+          </button>
+          <button 
+            onClick={() => setActiveTab('social-media')}
+                className={`px-4 py-2 ${activeTab === 'social-media' ? 'border-b-2 border-blue-500 font-medium' : 'text-gray-500 hover:text-gray-700'}`}
+          >
+            Social Media
+          </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Tab Content */}
+        <div className="flex-1 p-3 sm:p-6">
+          {renderTabContent()}
+        </div>
+
+        {/* Help Center Modal */}
+        {helpCenterVisible && <HelpCenter />}
+      </div>
+    </AdminLayout>
+  );
+};
+
+export default OwnerDashboardPage;

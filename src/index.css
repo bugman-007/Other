@@ -1,0 +1,271 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Your other CSS rules below */
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: #f9fafb;
+}
+
+/* Fix for navigation links on mobile */
+header a {
+  display: inline-block;
+  padding: 0.25rem 0;
+}
+
+/* Container padding on small screens */
+@media (max-width: 640px) {
+  .container {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+}
+
+/* Canvas container styles */
+.canvas-container {
+  position: relative;
+  width: 100%;
+  height: 300px;
+  background-color: #f0f0f0;
+  border-radius: 0.5rem;
+  overflow: hidden;
+}
+
+/* Responsive canvas height */
+@media (min-width: 768px) {
+  .canvas-container {
+    height: 400px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .canvas-container {
+    height: 500px;
+  }
+}
+
+/* Animation classes */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+/* Enhanced category cards */
+.category-card {
+  overflow: hidden;
+  position: relative;
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.08);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  cursor: pointer;
+}
+
+.category-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1), 0 4px 6px rgba(0, 0, 0, 0.05);
+}
+
+.category-card .category-image {
+  height: 280px;
+  background-size: cover;
+  background-position: center;
+  transition: transform 0.5s ease;
+}
+
+.category-card:hover .category-image {
+  transform: scale(1.05);
+}
+
+.category-card .category-overlay {
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.8) 0%, transparent 100%);
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: flex-end;
+  padding: 1.5rem;
+}
+
+/* Demo showcase enhancements */
+.demo-showcase {
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.15);
+  position: relative;
+  height: 480px;
+  max-width: 900px;
+  margin: 0 auto;
+  border: 1px solid #e5e7eb;
+}
+
+.demo-header {
+  background: linear-gradient(to right, #f9fafb, #ffffff);
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.demo-window-controls {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.demo-window-controls .control {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+}
+
+.demo-window-controls .close {
+  background-color: #ff5f57;
+}
+
+.demo-window-controls .minimize {
+  background-color: #febc2e;
+}
+
+.demo-window-controls .maximize {
+  background-color: #28c840;
+}
+
+.demo-content {
+  position: relative;
+  height: calc(100% - 96px);
+  background-color: #f3f4f6;
+  overflow: hidden;
+}
+
+@media (min-width: 768px) {
+  .demo-content {
+    height: 400px;
+  }
+}
+
+/* Woman and man model backgrounds */
+.woman-model {
+  background-image: url('https://images.pexels.com/photos/11136617/pexels-photo-11136617.jpeg?auto=compress&cs=tinysrgb&w=800');
+  background-size: cover;
+  background-position: center 15%;
+  position: relative;
+}
+
+.woman-model::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(to bottom, rgba(0,0,0,0.1), rgba(0,0,0,0.4));
+}
+
+.man-model {
+  background-image: url('https://images.pexels.com/photos/5794559/pexels-photo-5794559.jpeg?auto=compress&cs=tinysrgb&w=800');
+  background-size: cover;
+  background-position: center 25%;
+  position: relative;
+}
+
+.man-model::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(to bottom, rgba(0,0,0,0.1), rgba(0,0,0,0.4));
+}
+
+.product-option {
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: all 0.2s ease;
+}
+
+.product-option:hover {
+  border-color: #d1d5db;
+  transform: translateY(-2px);
+}
+
+.color-option {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: transform 0.2s;
+  border: 2px solid transparent;
+}
+
+.color-option:hover {
+  transform: scale(1.1);
+}
+
+.color-option.active {
+  border-color: #4b5563;
+  transform: scale(1.1);
+}
+
+/* Video call UI enhancements */
+.video-call-view {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.video-call-controls {
+  height: 60px;
+  background-color: #111827;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+}
+
+.video-call-button {
+  width: 40px;
+  height: 40px;
+  background-color: #374151;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.video-call-button:hover {
+  background-color: #4b5563;
+}
+
+.video-call-button.end-call {
+  background-color: #ef4444;
+  width: 48px;
+  height: 48px;
+}
+
+.video-call-button.end-call:hover {
+  background-color: #dc2626;
+}
+
+/* Category Card Styling */
+.category-card img {
+  transition: transform 0.3s ease-in-out;
+}
+
+.category-card:hover img {
+  transform: scale(1.05);
+}

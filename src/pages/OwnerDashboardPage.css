@@ -1,0 +1,702 @@
+/* OwnerDashboardPage.css */
+
+/* Dashboard cards styling */
+.dashboard-stat-card {
+  transition: all 0.3s;
+}
+
+.dashboard-stat-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+}
+
+/* Blog content editor styling */
+.blog-content h1, 
+.blog-content h2, 
+.blog-content h3 {
+  margin-top: 1.5rem;
+  margin-bottom: 1rem;
+  font-weight: 600;
+}
+
+.blog-content h1 {
+  font-size: 1.75rem;
+}
+
+.blog-content h2 {
+  font-size: 1.5rem;
+}
+
+.blog-content h3 {
+  font-size: 1.25rem;
+}
+
+.blog-content p {
+  margin-bottom: 1rem;
+  line-height: 1.6;
+}
+
+.blog-content ul, 
+.blog-content ol {
+  margin-bottom: 1rem;
+  padding-left: 1.5rem;
+}
+
+.blog-content li {
+  margin-bottom: 0.5rem;
+}
+
+.blog-content a {
+  color: #1890ff;
+  text-decoration: none;
+}
+
+.blog-content a:hover {
+  text-decoration: underline;
+}
+
+.blog-content blockquote {
+  padding: 0.5rem 1rem;
+  margin-bottom: 1rem;
+  border-left: 4px solid #f0f0f0;
+  color: #666;
+}
+
+/* ReactQuill editor styles */
+.ql-editor {
+  min-height: 200px;
+}
+
+/* Tabs overflow handling */
+.ant-tabs-nav-wrap {
+  overflow-x: auto;
+}
+
+/* Form styling for better spacing */
+.ant-form-item {
+  margin-bottom: 16px;
+}
+
+/* Blog preview styling */
+.blog-preview img {
+  max-width: 100%;
+  height: auto;
+}
+
+.blog-preview h1,
+.blog-preview h2,
+.blog-preview h3 {
+  margin-top: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+/* Page Manager Styling */
+.page-manager-container {
+  background: #fff;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.page-section-title {
+  margin-bottom: 24px;
+}
+
+.page-section-title h3 {
+  font-size: 20px;
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+
+.page-description {
+  color: #666;
+  margin-bottom: 16px;
+  max-width: 700px;
+  font-size: 14px;
+}
+
+.page-actions-container {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.page-filter-input {
+  width: 240px;
+}
+
+.page-type-filter {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.page-list-item {
+  display: flex;
+  align-items: center;
+  padding: 12px 16px;
+  background: #fff;
+  border-radius: 8px;
+  margin-bottom: 8px;
+  border: 1px solid #f0f0f0;
+  transition: all 0.2s;
+}
+
+.page-list-item:hover {
+  background: #f9f9f9;
+  border-color: #d9d9d9;
+}
+
+.drag-handle {
+  margin-right: 16px;
+  color: #bfbfbf;
+  cursor: grab;
+}
+
+.page-list-item-title {
+  flex: 2;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+}
+
+.page-visibility-badge {
+  margin-left: 8px;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: normal;
+}
+
+.page-visibility-badge.draft {
+  background-color: #faad14;
+  color: #fff;
+}
+
+.page-visibility-badge.published {
+  background-color: #52c41a;
+  color: #fff;
+}
+
+.page-list-item-path {
+  flex: 1;
+  color: #8c8c8c;
+  font-size: 13px;
+}
+
+.page-list-item-actions {
+  display: flex;
+  gap: 4px;
+}
+
+/* Mobile Page Cards */
+.mobile-page-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.mobile-page-card {
+  background: #fff;
+  border-radius: 8px;
+  padding: 16px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  border: 1px solid #f0f0f0;
+  display: flex;
+  flex-direction: column;
+  transition: all 0.2s;
+}
+
+.mobile-page-card:hover {
+  border-color: #40a9ff;
+  box-shadow: 0 4px 12px rgba(24, 144, 255, 0.1);
+}
+
+.mobile-page-card-content {
+  margin-bottom: 16px;
+}
+
+.mobile-page-card-title {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.mobile-page-card-slug {
+  color: #8c8c8c;
+  font-size: 13px;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+}
+
+.mobile-page-card-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.mobile-page-card-updated {
+  font-size: 12px;
+  color: #8c8c8c;
+  display: flex;
+  align-items: center;
+}
+
+.mobile-page-card-placements {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.mobile-page-card-actions {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: 12px;
+  border-top: 1px solid #f0f0f0;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .page-manager-container {
+    padding: 16px;
+  }
+  
+  .page-actions-container {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .page-filter-input {
+    width: 100%;
+  }
+  
+  .page-type-filter {
+    justify-content: space-between;
+    width: 100%;
+  }
+  
+  .page-section-title h3 {
+    font-size: 18px;
+  }
+  
+  .page-description {
+    font-size: 13px;
+  }
+}
+
+/* Main tabs in PageManager - Enhanced styles */
+.main-tabs {
+  border-bottom: none;
+}
+
+.main-tabs .ant-tabs-nav {
+  margin-bottom: 0;
+  width: 100%;
+}
+
+.main-tabs .ant-tabs-nav::before {
+  border-bottom: none;
+}
+
+.main-tabs .ant-tabs-tab {
+  padding: 0.75rem 1rem;
+  font-size: 1rem;
+  transition: all 0.3s;
+  margin: 0;
+  margin-right: 1.5rem;
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.main-tabs .ant-tabs-tab:hover {
+  color: #1890ff;
+}
+
+.main-tabs .ant-tabs-tab-active {
+  font-weight: 500;
+}
+
+.main-tabs .ant-tabs-ink-bar {
+  height: 3px;
+  background-color: #1890ff;
+  border-radius: 3px 3px 0 0;
+}
+
+.tab-label {
+  font-weight: 500;
+  font-size: 16px;
+  color: #6b7280;
+}
+
+.ant-tabs-tab.ant-tabs-tab-active .tab-label {
+  color: #1890ff;
+  font-weight: 600;
+}
+
+@media (max-width: 768px) {
+  .main-tabs .ant-tabs-tab {
+    padding: 0.5rem 0.5rem;
+    font-size: 0.875rem;
+    margin-right: 1rem;
+  }
+  
+  .main-tabs .ant-tabs-nav {
+    margin-bottom: 0;
+  }
+  
+  .tab-label {
+    font-size: 14px;
+  }
+}
+
+.page-placement-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+@media (min-width: 768px) {
+  .page-placement-container {
+    gap: 16px;
+  }
+}
+
+.placement-option {
+  padding: 6px 12px;
+  border: 1px solid #d9d9d9;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 13px;
+}
+
+@media (min-width: 768px) {
+  .placement-option {
+    padding: 8px 16px;
+    font-size: 14px;
+  }
+}
+
+.seo-preview-container {
+  padding: 15px;
+  background-color: #f5f5f5;
+  border-radius: 6px;
+  margin-top: 1rem;
+}
+
+.template-selection-container {
+  padding: 0;
+}
+
+.template-header {
+  margin-bottom: 1.5rem;
+}
+
+.template-header h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0 0 0.5rem 0;
+}
+
+.template-header p {
+  color: #666;
+  margin: 0;
+}
+
+.template-card {
+  height: 100%;
+  transition: all 0.2s;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+}
+
+.template-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+}
+
+.template-icon {
+  font-size: 24px;
+  color: #1890ff;
+  margin-bottom: 12px;
+}
+
+/* Mobile responsive table */
+@media (max-width: 767px) {
+  .ant-table-cell {
+    padding: 8px !important;
+  }
+  
+  .ant-table-row .ant-btn {
+    padding: 0 8px;
+  }
+  
+  /* Enhancing the table's appearance on mobile */
+  .ant-table-thead > tr > th {
+    font-size: 12px;
+    white-space: nowrap;
+  }
+  
+  .ant-table-tbody > tr > td {
+    font-size: 13px;
+  }
+  
+  /* Make tag display better on mobile */
+  .ant-tag {
+    margin: 2px;
+    font-size: 11px;
+    padding: 0 4px;
+    line-height: 16px;
+  }
+}
+
+/* ReactQuill responsive styling */
+@media (max-width: 767px) {
+  .ql-toolbar.ql-snow {
+    padding: 4px;
+  }
+  
+  .ql-snow .ql-formats {
+    margin-right: 6px;
+  }
+  
+  .ql-editor {
+    min-height: 150px;
+  }
+  
+  .mobile-editor .ql-toolbar.ql-snow {
+    flex-wrap: wrap;
+  }
+}
+
+.page-list-item:hover .drag-handle {
+  color: #1890ff;
+}
+
+/* Category Articles responsive styling */
+.category-articles-container {
+  width: 100%;
+  overflow-x: hidden;
+}
+
+@media (max-width: 767px) {
+  /* Mobile card view styles */
+  .article-card {
+    border-bottom: 1px solid #f0f0f0;
+    padding: 12px;
+    margin-bottom: 0;
+  }
+  
+  .article-card-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 8px;
+  }
+  
+  .article-card-content {
+    flex: 1;
+    min-width: 0;
+  }
+  
+  .article-card-title {
+    font-weight: 500;
+    font-size: 15px;
+    margin-bottom: 4px;
+    color: #333;
+  }
+  
+  .article-card-summary {
+    font-size: 13px;
+    color: #666;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    line-height: 1.4;
+  }
+  
+  .article-card-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 8px;
+  }
+  
+  .article-card-meta {
+    font-size: 12px;
+    color: #888;
+  }
+  
+  .article-card-actions {
+    display: flex;
+    gap: 16px;
+  }
+  
+  .article-card-actions button {
+    padding: 8px;
+    margin: 0;
+    background: none;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
+
+/* Button spacing and touch targets for mobile */
+@media (max-width: 767px) {
+  .btn-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  
+  .action-button {
+    min-height: 36px;
+    min-width: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .icon-button {
+    padding: 8px;
+  }
+}
+
+/* Line clamp utility for truncating text */
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.line-clamp-1 {
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Page Manager component wrapper */
+.page-manager {
+  width: 100%;
+}
+
+/* Analytics Tab responsive styling */
+.analytics-tab-content {
+  width: 100%;
+  overflow-x: hidden;
+}
+
+.analytics-filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.analytics-card {
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  padding: 16px;
+  margin-bottom: 16px;
+  transition: all 0.2s;
+}
+
+.analytics-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.analytics-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.analytics-tables-container {
+  width: 100%;
+  overflow-x: auto;
+}
+
+@media (max-width: 767px) {
+  .analytics-filter-bar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .analytics-filter-bar .ant-select,
+  .analytics-filter-bar .ant-picker {
+    width: 100% !important;
+  }
+  
+  .analytics-buttons {
+    justify-content: center;
+    width: 100%;
+  }
+  
+  .analytics-buttons button {
+    flex: 1;
+    min-width: unset;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 13px;
+    padding: 6px 8px;
+  }
+  
+  .analytics-card-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  
+  .analytics-tables-container {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 8px;
+  }
+  
+  .analytics-tables-container table {
+    min-width: 500px;
+  }
+  
+  .analytics-tables-container th,
+  .analytics-tables-container td {
+    white-space: nowrap;
+    padding: 8px !important;
+    font-size: 12px;
+  }
+  
+  /* Specific adjustments for analytics cards on mobile */
+  .analytics-stat-card {
+    padding: 12px;
+  }
+  
+  .analytics-stat-card-title {
+    font-size: 13px;
+    margin-bottom: 4px;
+  }
+  
+  .analytics-stat-card-value {
+    font-size: 20px;
+  }
+  
+  /* Allow scrolling for demographic charts on mobile */
+  .demographic-charts-container {
+    overflow-x: auto;
+    padding-bottom: 8px;
+  }
+} 
