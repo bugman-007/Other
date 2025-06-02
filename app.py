@@ -6,16 +6,18 @@ from io import BytesIO
 from PIL import Image
 import requests
 import logging
+from dotenv import load_dotenv
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+load_dotenv()
 
 app = Flask(__name__)
 CORS(app)  # Enable CORS for all routes
 
 # API key from environment variable or default
-HUGGINGFACE_API_KEY = os.environ.get('HUGGINGFACE_API_KEY', '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')
+HUGGINGFACE_API_KEY = os.getenv('HUGGINGFACE_API_KEY')
 
 def base64_to_image(base64_string):
     """Convert base64 string to image"""
