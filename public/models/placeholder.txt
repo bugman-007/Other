@@ -1,0 +1,29 @@
+# Model Placeholder Files
+
+This file explains how to create simple placeholder 3D models for the try-on system.
+
+## Required Model Files
+The application expects the following model files in this directory:
+- human_model.glb
+- tshirt.glb
+- jacket.glb
+- pants.glb
+- dress.glb
+
+## Creating Simple Placeholder Models
+You can create simple placeholder GLB models using Blender or any other 3D modeling software:
+
+1. Create a basic geometric shape (cube, cylinder, etc.)
+2. Export it as a .glb file
+3. Place it in this directory with the appropriate name
+
+## Online Model Services
+Alternatively, you can download free 3D models from:
+- Sketchfab: https://sketchfab.com/
+- TurboSquid: https://www.turbosquid.com/
+- Free3D: https://free3d.com/
+
+Look for models with permissive licenses and export in GLB format.
+
+## Using the Modified App
+The application has been updated to use fallback geometry when model files aren't available, so you can still test the app without these files, but for the best experience, actual GLB files should be provided. 
